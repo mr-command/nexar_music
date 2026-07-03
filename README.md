@@ -1,3 +1,3 @@
-# nexar_app
+# nexar_music
 
-it is getting better
+this music player is getting better
