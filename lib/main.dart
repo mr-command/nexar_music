@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'screens/HomeScreen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

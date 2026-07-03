@@ -5,8 +5,9 @@ Color dark_shadow = HexColorExtension.fromHex('#D1D9E6');
 
 Widget neuContainer(dynamic child){
   return Container(
+    margin: EdgeInsets.all(15),
     padding: EdgeInsets.only(left:10 , right: 10,top: 5,bottom: 5),
-    alignment: Alignment(0, 0),
+    alignment: Alignment(-1, 0),
     decoration: BoxDecoration(
       color: background,
       borderRadius: BorderRadius.circular(12),
