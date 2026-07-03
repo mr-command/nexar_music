@@ -1,3 +1,3 @@
 # nexar_app
 
-in development
+it is getting better
