@@ -2,28 +2,25 @@ import 'dart:io';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexar_app/components/AudioWidgets.dart';
 import 'package:nexar_app/components/neuContainer.dart';
+import 'package:nexar_app/services/Audio/AudioServices.dart';
+import 'package:nexar_app/services/Audio/audio_logic.dart';
+import 'package:nexar_app/services/DataBase/models.dart';
+import 'package:nexar_app/services/providers/providers.dart';
 import 'package:nexar_app/services/utils/helpers.dart';
 
 
-class Homescreen extends StatefulWidget {
-  const Homescreen({super.key});
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<Homescreen> createState() => _HomescreenState();
-}
-
-class _HomescreenState extends State<Homescreen> {
-  @override
-void initState() {
-  super.initState();
-}
-
-  Widget build(BuildContext context) {
-    final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-    // final Animation<double> animation;
+  Widget build(BuildContext context,WidgetRef ref) {
+    final player = ref.read(playerProvider);
+    final audio = ref.read(audioServiceProvider);
+    final currentSong = ref.watch(nowPlaying);
     List<String> musics = getMusicsDirectory();
-    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: background,
@@ -55,27 +52,14 @@ void initState() {
                   ),
                   SizedBox(height: 10,),
                   Container(
-                    width: 320,
-                    height: 175,
+                    width: MediaQuery.widthOf(context) * 0.5,
+                    height: MediaQuery.heightOf(context) * 0.4,
                     child: neuContainer(Container(
-                      width: 320,
-                      height: 175,
+                      width: MediaQuery.widthOf(context) * 0.5,
+                      height: MediaQuery.heightOf(context) * 0.4,
                       child: Column(
                         children: [
-                          Row(
-                            children: [
-                              // Container(
-                              //   width: 50,
-                              //   height: 50,
-                              //   child: IconButton(
-                              //     style: IconButton.styleFrom(fixedSize: Size(100, 100)),
-                              //     onPressed: () {
-                              //     MusicService().play();
-                              //   }, icon: Icon(Icons.play_arrow_rounded)),
-                              // ),
-                              
-                            ],
-                          ),
+                          currentPlayingMusic(context, currentSong,player,audio),
                         ],
                       ),
                     )),
@@ -111,12 +95,17 @@ void initState() {
 
                 Container(
                     
-                     width: MediaQuery.widthOf(context) * 0.9,
-                     height: MediaQuery.heightOf(context) * 0.5,
+                     width: MediaQuery.widthOf(context) * 0.85,
+                     height: MediaQuery.heightOf(context) * 0.35,
                      child: ListView.builder(
                       itemCount: musics.length,
                       itemBuilder: (context, index) {
                         final tags = readMetadata(File(musics[index]), getImage: true);
+                        final song = Song(
+                          path: musics[index],
+                          metadata: tags,
+                        );
+                        
                         try {
                           return neuContainer(
                           Container(
@@ -131,13 +120,21 @@ void initState() {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                                                ClipRRect(
-                                borderRadius: BorderRadiusGeometry.circular(15),
-                                child: Image.memory(
-                                  width: 85,
-                                  height: 85,
-                                  tags.pictures.first.bytes
-                                ),
+                                ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: tags.pictures.isNotEmpty
+                                    ? Image.memory(
+                                        tags.pictures.first.bytes,
+                                        width: 85,
+                                        height: 85,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        width: 85,
+                                        height: 85,
+                                        color: Colors.grey,
+                                        child: const Icon(Icons.music_note),
+                                      ),
                               ),
                               SizedBox(width: 10,),
                               Text(tags.title.toString(),style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold)),
@@ -151,7 +148,13 @@ void initState() {
                               Row(
                                 children: [
                                   Icon(Icons.arrow_back_ios_new_rounded),
-                                  Icon(Icons.play_arrow_rounded),
+                                  IconButton(
+                                    onPressed: () {
+                                      ref.read(nowPlaying.notifier).state = song;
+                                      toggleMusicState(audio,player,song.path,index);
+                                    },
+                                     icon: Icon(Icons.play_arrow)
+                                    ),
                                   Icon(Icons.arrow_forward_ios_rounded),
                                 ],
                               )
@@ -161,7 +164,7 @@ void initState() {
                           ),
                         ));
                         } catch (e) {
-                          1+1;
+                          print(e);
                         }
                       },
                     ),
@@ -172,3 +175,4 @@ void initState() {
     );
   }
 }
+

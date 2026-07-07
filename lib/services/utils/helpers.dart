@@ -3,7 +3,7 @@ import 'dart:io';
 
 List<String> getMusicsDirectory() { // example : home/amin/musics 
   final home = Platform.environment['HOME']!;
-  final directory = Directory('$home/Music');
+  final directory = Directory('$home/Music/new/');
   const extensions = ['.mp3'];
 
   if(!directory.existsSync()){
@@ -19,7 +19,7 @@ List<String> getMusicsDirectory() { // example : home/amin/musics
 
 debug(){
   final home = Platform.environment['HOME']!;
-  final dir = Directory('$home/Music');
+  final dir = Directory('$home/Music/new/');
   final files = dir.listSync(recursive: true);
 
   print("Found: ${files.length}");
@@ -29,3 +29,7 @@ debug(){
   }
 }
 
+betterTitle(String path){
+
+  return path.toLowerCase().replaceAll(":", "").replaceAll("~", "").replaceAll(".com", "").replaceAll(".ir", "").replaceAll(".org", "").replaceAll("@", "").replaceAll("-", "").replaceAll("_", "").replaceAll(".", "");
+}
