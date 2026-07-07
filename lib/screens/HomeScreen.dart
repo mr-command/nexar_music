@@ -34,8 +34,10 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: Container(
         color: background,
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        width: double.infinity,
+        height: double.infinity,
+        child: ListView(
+            padding: EdgeInsets.all(20),
             children: [
               // current playing music section
 
@@ -52,11 +54,11 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   SizedBox(height: 10,),
                   Container(
-                    width: MediaQuery.widthOf(context) * 0.5,
-                    height: MediaQuery.heightOf(context) * 0.4,
+                    width: MediaQuery.widthOf(context) * 0.3,
+                    height: MediaQuery.heightOf(context) * 0.6,
                     child: neuContainer(Container(
-                      width: MediaQuery.widthOf(context) * 0.5,
-                      height: MediaQuery.heightOf(context) * 0.4,
+                      width: MediaQuery.widthOf(context) * 0.3,
+                      height: MediaQuery.heightOf(context) * 0.6,
                       child: Column(
                         children: [
                           currentPlayingMusic(context, currentSong,player,audio),
@@ -128,6 +130,14 @@ class HomeScreen extends ConsumerWidget {
                                         width: 85,
                                         height: 85,
                                         fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                        return  Container(
+                                        width: 85,
+                                        height: 85,
+                                        color: Colors.grey,
+                                        child: const Icon(Icons.music_note),
+                                      );
+                                        },
                                       )
                                     : Container(
                                         width: 85,
@@ -135,15 +145,18 @@ class HomeScreen extends ConsumerWidget {
                                         color: Colors.grey,
                                         child: const Icon(Icons.music_note),
                                       ),
+                                      
                               ),
                               SizedBox(width: 10,),
-                              Text(tags.title.toString(),style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold)),
+                              tags.title != null 
+                              ? Text(tags.title.toString(),style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold))
+                              : Text("unknown",style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold))
 
                                 ],
                               ),
-
-                              Text(tags.artist.toString(),style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,),
-
+                              tags.artist != null
+                              ? Text(tags.artist.toString(),style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,)
+                              : Text("unknown",style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold)),
 
                               Row(
                                 children: [
