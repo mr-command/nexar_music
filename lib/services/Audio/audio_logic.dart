@@ -1,27 +1,24 @@
 import 'package:media_kit/media_kit.dart';
+import 'package:nexar_app/services/DataBase/models.dart';
 import 'AudioServices.dart';
 
 Future<void> toggleMusicState(
   AudioServices audio,
   Player player,
-  String path,
+  List<String> songs,
   int index
 ) async {
   
   try {
     if (!player.state.playing) {
 
-    await audio.playMusic(path);
+    await audio.repeatMusic();
     
 
-  } 
-  else if(player.state.completed){
-    await audio.playMusic(path);
-  }
-  else {
+  } else {
 
     await audio.pauseMusic();
-    await audio.playMusic(path);
+    await audio.loadPlayList(songs);
     
   }
   } catch (e) {

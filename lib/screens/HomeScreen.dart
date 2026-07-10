@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nexar_app/components/AudioWidgets.dart';
-import 'package:nexar_app/components/neuContainer.dart';
+import 'package:nexar_app/components/neumorphism/neuContainer.dart';
 import 'package:nexar_app/services/Audio/AudioServices.dart';
 import 'package:nexar_app/services/Audio/audio_logic.dart';
 import 'package:nexar_app/services/DataBase/models.dart';
@@ -98,15 +98,18 @@ class HomeScreen extends ConsumerWidget {
                 Container(
                     
                      width: MediaQuery.widthOf(context) * 0.85,
-                     height: MediaQuery.heightOf(context) * 0.35,
+                     height: MediaQuery.heightOf(context) * 0.55,
                      child: ListView.builder(
                       itemCount: musics.length,
                       itemBuilder: (context, index) {
                         final tags = readMetadata(File(musics[index]), getImage: true);
                         final song = Song(
+                          id: index,
                           path: musics[index],
                           metadata: tags,
                         );
+                        
+                        
                         
                         try {
                           return neuContainer(
@@ -156,7 +159,7 @@ class HomeScreen extends ConsumerWidget {
                               ),
                               tags.artist != null
                               ? Text(tags.artist.toString(),style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,)
-                              : Text("unknown",style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold)),
+                              : Text("unknown artist",style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold)),
 
                               Row(
                                 children: [
@@ -164,7 +167,7 @@ class HomeScreen extends ConsumerWidget {
                                   IconButton(
                                     onPressed: () {
                                       ref.read(nowPlaying.notifier).state = song;
-                                      toggleMusicState(audio,player,song.path,index);
+                                      toggleMusicState(audio,player,musics,index);
                                     },
                                      icon: Icon(Icons.play_arrow)
                                     ),

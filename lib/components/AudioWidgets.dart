@@ -1,6 +1,7 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:nexar_app/services/Audio/AudioServices.dart';
 import 'package:nexar_app/services/utils/helpers.dart';
 import 'text_styles.dart';
 
