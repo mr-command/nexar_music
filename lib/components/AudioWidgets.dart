@@ -1,11 +1,14 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:nexar_app/components/liquidglass/liquid_buttons.dart';
+import 'package:nexar_app/components/liquidglass/liquid_proccesbar.dart';
 import 'package:nexar_app/services/Audio/AudioServices.dart';
 import 'package:nexar_app/services/utils/helpers.dart';
 import 'text_styles.dart';
 
-Widget currentPlayingMusic(context,tag,Player player,audio){
+Widget currentPlayingMusic(context,tag,Player player,audio,WidgetRef ref){
 
   return Container(
     // padding: EdgeInsets.all(15),
@@ -46,7 +49,9 @@ Widget currentPlayingMusic(context,tag,Player player,audio){
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(tag.metadata.title.toString(),style: secondryHeaderTextStyle,),
+                    tag.metadata.title.toString().length > 20
+                    ?Text(tag.metadata.title.toString().substring(0,20),style: secondryHeaderTextStyle,)
+                    :Text(tag.metadata.title.toString().substring(0,tag.metadata.title.toString().length),style: secondryHeaderTextStyle,),
                     SizedBox(height: 20,),
                     tag.metadata.pictures.isNotEmpty
                     ? ClipRRect(
@@ -83,28 +88,7 @@ Widget currentPlayingMusic(context,tag,Player player,audio){
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                  StreamBuilder<Duration>(
-                    stream: player.stream.position,
-                    builder: (context, positionSnapshot) {
-                      return StreamBuilder<Duration>(
-                        stream: player.stream.duration,
-                        builder: (context, durationSnapshot) {
-                          return Container(
-                            width: 300,
-                            height: 50,
-                            child: ProgressBar(
-                              baseBarColor: Colors.white,
-                              progressBarColor: Colors.grey,
-
-                              progress: positionSnapshot.data ?? Duration.zero,
-                              total: durationSnapshot.data ?? Duration.zero,
-                              onSeek: player.seek,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                  liquidproccesbar(player)
 
               ],
             ),
@@ -113,28 +97,9 @@ Widget currentPlayingMusic(context,tag,Player player,audio){
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                IconButton(
-                  onPressed: (){
-                    audio.preMusic();
-                  },
-                   icon: Icon(Icons.skip_previous)
-                ),
-                IconButton(
-                  onPressed: (){
-                    if(player.state.playing){
-                      audio.pauseMusic();
-                    } else {
-                      audio.conMusic();
-                    }
-                  },
-                   icon: Icon(Icons.pause)
-                ),
-                IconButton(
-                  onPressed: (){
-                    audio.nextMusic();
-                  },
-                   icon: Icon(Icons.skip_next)
-                ),
+                liquidPreviousButton(player, audio,ref),
+                liquidPauseButton(player, audio),
+                liquidNextButton(player, audio, ref)
                 
               ],
             )

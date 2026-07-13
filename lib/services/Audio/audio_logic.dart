@@ -12,13 +12,13 @@ Future<void> toggleMusicState(
   try {
     if (!player.state.playing) {
 
-    await audio.repeatMusic();
+    await audio.loadPlayList(songs,index);
     
 
   } else {
 
     await audio.pauseMusic();
-    await audio.loadPlayList(songs);
+    await audio.loadPlayList(songs,index);
     
   }
   } catch (e) {

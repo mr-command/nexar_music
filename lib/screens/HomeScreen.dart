@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nexar_app/components/AudioWidgets.dart';
+import 'package:nexar_app/components/liquidglass/liquidContainer.dart';
 import 'package:nexar_app/components/neumorphism/neuContainer.dart';
 import 'package:nexar_app/services/Audio/AudioServices.dart';
 import 'package:nexar_app/services/Audio/audio_logic.dart';
@@ -20,20 +21,30 @@ class HomeScreen extends ConsumerWidget {
     final player = ref.read(playerProvider);
     final audio = ref.read(audioServiceProvider);
     final currentSong = ref.watch(nowPlaying);
+    final design = ref.watch(designSYstemProvider);
+
+
     List<String> musics = getMusicsDirectory();
+    // audio.loadPlayList(musics);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: background,
+        backgroundColor: Colors.black,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            neuContainer(Text("Nexar",style: TextStyle(fontFamily: "tahoma",fontWeight: FontWeight.bold),)),
+            design.AppContainer(child:Text("Nexar",style: TextStyle(fontFamily: "tahoma",fontWeight: FontWeight.bold),),context: context),
             
           ],
         ),
       ),
       body: Container(
-        color: background,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/liquid.jpg'),
+            fit: BoxFit.cover
+          )
+        ),
+        
         width: double.infinity,
         height: double.infinity,
         child: ListView(
@@ -56,15 +67,15 @@ class HomeScreen extends ConsumerWidget {
                   Container(
                     width: MediaQuery.widthOf(context) * 0.3,
                     height: MediaQuery.heightOf(context) * 0.6,
-                    child: neuContainer(Container(
+                    child: design.AppContainer(child:Container(
                       width: MediaQuery.widthOf(context) * 0.3,
                       height: MediaQuery.heightOf(context) * 0.6,
                       child: Column(
                         children: [
-                          currentPlayingMusic(context, currentSong,player,audio),
+                          currentPlayingMusic(context, currentSong,player,audio,ref),
                         ],
                       ),
-                    )),
+                    ),context:context),
                   )
                 ],
               ),
@@ -112,12 +123,12 @@ class HomeScreen extends ConsumerWidget {
                         
                         
                         try {
-                          return neuContainer(
-                          Container(
+                          return design.AppTile(
+                          child : Container(
                           
                           width: MediaQuery.widthOf(context) * 0.8,
                           height: 100,
-                          
+                          margin: EdgeInsets.all(10),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -178,7 +189,8 @@ class HomeScreen extends ConsumerWidget {
 
                             ],
                           ),
-                        ));
+                        )
+                        );
                         } catch (e) {
                           print(e);
                         }
@@ -187,6 +199,21 @@ class HomeScreen extends ConsumerWidget {
                    )
                 ],
               ),
+      ),
+
+      drawer: Drawer(
+        
+        backgroundColor: Colors.black,
+        child: Column(
+          children: [
+            TextButton(onPressed: (){
+              ref.read(themeProvider.notifier).state = AppStyle.neumorphism;
+            }, child: Text("neuMorphism",style: TextStyle(color: Colors.white),)),
+            TextButton(onPressed: (){
+              ref.read(themeProvider.notifier).state = AppStyle.liquid;
+            }, child: Text("liquid glass",style: TextStyle(color: Colors.white)))
+          ],
+        ),
       ),
     );
   }

@@ -9,11 +9,24 @@ class AudioServices {
 
   List<String> _medias = [];
   
-  Future<void> loadPlayList(List<String> medias) async {
+  Future<void> loadPlayList(List<String> medias,int index) async {
     _medias = medias;
     await player.open(
       Playlist(
-        medias.map((e) => Media(e),).toList()
+        medias.map((e) => Media(e),).toList(),
+        index: index,
+
+      )
+    );
+  }
+  Future<void> loadPlayable(Song song) async {
+    await player.open(
+      Media(
+        song.path,
+        extras: {
+          'song':song
+        }
+        
       )
     );
   }
@@ -50,35 +63,3 @@ class AudioServices {
 
 }
 
-
-class PlaylistServices {
-  final List<Song> songs;
-  int _currentIndex = 0;
-
-  PlaylistServices(this.songs);
-
-  Song get current => songs[_currentIndex];
-
-  Song next() {
-    if (_currentIndex < songs.length - 1) {
-      _currentIndex++;
-    }
-    return current;
-  }
-
-  Song previous() {
-    if (_currentIndex > 0) {
-      _currentIndex--;
-    }
-    return current;
-  }
-
-  void jumpTo(int index) {
-    if (index >= 0 && index < songs.length) {
-      _currentIndex = index;
-    }
-  }
-
-  bool get hasNext => _currentIndex < songs.length - 1;
-  bool get hasPrevious => _currentIndex > 0;
-}
