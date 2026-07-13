@@ -8,8 +8,10 @@ import 'package:nexar_app/services/Audio/AudioServices.dart';
 import 'package:nexar_app/services/DataBase/models.dart';
 import 'package:nexar_app/services/providers/providers.dart';
 
-Widget liquidPauseButton(Player player, AudioServices audio){
+Widget liquidPauseButton(Player player, AudioServices audio,WidgetRef ref){
+  final playing = ref.watch(isplayinProvider);
   return IconButton(
+
     onPressed: (){
       if(player.state.playing){
         audio.pauseMusic();
@@ -17,7 +19,9 @@ Widget liquidPauseButton(Player player, AudioServices audio){
         audio.conMusic();
       }
     },
-    icon: Icon(Icons.pause),
+    icon: playing
+    ? Icon(Icons.pause)
+    : Icon(Icons.play_arrow),
 
     style: IconButton.styleFrom(
       foregroundColor: Colors.white,

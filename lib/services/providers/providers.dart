@@ -1,4 +1,5 @@
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:media_kit/media_kit.dart';
@@ -45,6 +46,17 @@ final designSYstemProvider = Provider(
       case AppStyle.neumorphism:
         return NeumorphismDesign();
     }
+  }
+);
+final currentSongProvider = Provider<Song?>((ref) {
+  return null;
+});
+
+
+final isplayinProvider = StateProvider<bool>(
+  (ref){
+    final player = ref.watch(playerProvider);
+    return player.state.playing;
   }
 );
 

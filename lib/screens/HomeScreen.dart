@@ -27,16 +27,16 @@ class HomeScreen extends ConsumerWidget {
     List<String> musics = getMusicsDirectory();
     // audio.loadPlayList(musics);
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            design.AppContainer(child:Text("Nexar",style: TextStyle(fontFamily: "tahoma",fontWeight: FontWeight.bold),),context: context),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.black,
+      //   title: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //     children: [
+      //       design.AppContainer(child:Text("Nexar",style: TextStyle(fontFamily: "tahoma",fontWeight: FontWeight.bold),),context: context),
             
-          ],
-        ),
-      ),
+      //     ],
+      //   ),
+      // ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -58,7 +58,7 @@ class HomeScreen extends ConsumerWidget {
                     padding: EdgeInsets.only(left: 25),
                     child: Row(
                       children: [
-                         Text("Playing Right Now",style: TextStyle(fontFamily: "tahoma",fontSize: 18,fontWeight: FontWeight.bold),),
+                         design.AppTitle(child: "Playing Right Now",),
 
                       ],
                     ),
@@ -72,7 +72,7 @@ class HomeScreen extends ConsumerWidget {
                       height: MediaQuery.heightOf(context) * 0.6,
                       child: Column(
                         children: [
-                          currentPlayingMusic(context, currentSong,player,audio,ref),
+                          currentPlayingMusic(context, currentSong,player,audio,ref,design),
                         ],
                       ),
                     ),context:context),
@@ -87,7 +87,7 @@ class HomeScreen extends ConsumerWidget {
               //       padding: EdgeInsets.only(left: 25),
               //       child: Row(
               //         children: [
-              //           Text("P L A Y L I S T S",style: TextStyle(fontFamily: "tahoma",fontSize: 18,fontWeight: FontWeight.bold),),
+              //           Text("P L A Y L I S T S",),
               //         ],
               //       ),
               //     ),
@@ -101,7 +101,7 @@ class HomeScreen extends ConsumerWidget {
                   children: [
                     Container(
                       padding: EdgeInsets.only(left: 25),
-                      child: Text("M U S I C S",style:TextStyle(fontFamily: "tahoma",fontSize: 18,fontWeight: FontWeight.bold)))
+                      child: design.AppTitle(child: "M U S I C S"))
                   ],
                 ),
 
@@ -113,6 +113,8 @@ class HomeScreen extends ConsumerWidget {
                      child: ListView.builder(
                       itemCount: musics.length,
                       itemBuilder: (context, index) {
+                        final currentSong = ref.watch(currentSongProvider);
+                        final isCurrentSong = currentSong?.path == musics[index];
                         final tags = readMetadata(File(musics[index]), getImage: true);
                         final song = Song(
                           id: index,
@@ -124,6 +126,7 @@ class HomeScreen extends ConsumerWidget {
                         
                         try {
                           return design.AppTile(
+                          context: context,
                           child : Container(
                           
                           width: MediaQuery.widthOf(context) * 0.8,
@@ -163,26 +166,28 @@ class HomeScreen extends ConsumerWidget {
                               ),
                               SizedBox(width: 10,),
                               tags.title != null 
-                              ? Text(tags.title.toString(),style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold))
-                              : Text("unknown",style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold))
+                              ? design.AppTitle(child:tags.title.toString())
+                              : design.AppTitle(child:"unknown")
 
                                 ],
                               ),
                               tags.artist != null
-                              ? Text(tags.artist.toString(),style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,)
-                              : Text("unknown artist",style:TextStyle(fontFamily: "tahoma",fontSize: 16,fontWeight: FontWeight.bold)),
+                              ? design.AppTitle(child: tags.artist.toString())
+                              : design.AppTitle(child:"unknown artist"),
 
                               Row(
                                 children: [
-                                  Icon(Icons.arrow_back_ios_new_rounded),
+                                  
                                   IconButton(
                                     onPressed: () {
                                       ref.read(nowPlaying.notifier).state = song;
                                       toggleMusicState(audio,player,musics,index);
                                     },
-                                     icon: Icon(Icons.play_arrow)
+                                     icon: isCurrentSong
+                                     ? Icon(Icons.pause,size: 30,color: Colors.white,)
+                                     : Icon(Icons.play_arrow,size: 30,color: Colors.white,)
                                     ),
-                                  Icon(Icons.arrow_forward_ios_rounded),
+                                  
                                 ],
                               )
 
@@ -203,7 +208,8 @@ class HomeScreen extends ConsumerWidget {
 
       drawer: Drawer(
         
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.black.withAlpha(120),
+        
         child: Column(
           children: [
             TextButton(onPressed: (){

@@ -26,3 +26,29 @@ Widget liquidContaner(dynamic child,BuildContext context){
     ),
   );
 }
+
+
+Widget liquidTile(BuildContext context,Widget child){
+  return Center(
+    
+    child: Container(
+      margin: EdgeInsets.all(10),
+      width: MediaQuery.widthOf(context) * 0.9,
+      height: 120,
+      child: LiquidGlassSurface(
+        blurSigma: 8,
+        // elevation: 100,
+        style: LiquidGlassStyle(blurSigma: 10,tintOpacity: 0.1,borderRadius: BorderRadius.circular(25)),
+        
+        
+        tintColor: Colors.white,
+        quality: LiquidGlassQuality.low,
+        borderRadius: BorderRadius.circular(25),
+        mode: LiquidGlassMode.auto,
+        highlightStrength: 0.2,
+
+        child: child
+      ),
+    ),
+  );
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nexar_app/components/liquidglass/liquidContainer.dart';
 import 'package:nexar_app/components/neumorphism/neuContainer.dart';
+import 'package:nexar_app/components/text_styles.dart';
 import 'package:nexar_app/services/providers/providers.dart';
 
 
@@ -13,13 +14,14 @@ abstract class DesignSystem {
   });
 
   Widget AppTile({
+    required BuildContext context,
     required Widget child,
   });
 
 
-  // Widget AppTitle({
-  //   required Widget child,
-  // });
+  Widget AppTitle({
+    required String child,
+  });
 
 
 }
@@ -33,9 +35,14 @@ class NeumorphismDesign implements DesignSystem{
   }
 
   @override
-  Widget AppTile({required Widget child}) {
+  Widget AppTile({required BuildContext context,required Widget child}) {
     // TODO: implement AppTile
     return neuHorizenListViewTile(child);
+  }
+  @override
+  Widget AppTitle({required String child}) {
+    // TODO: implement AppTitle
+    return Text(child,style: neumorphismtext );
   }
 
 }
@@ -50,9 +57,14 @@ class LiquidglassDesign implements DesignSystem{
   }
 
   @override
-  Widget AppTile({required Widget child}) {
+  Widget AppTile({required BuildContext context ,required Widget child}) {
     // TODO: implement AppTile
-    return neuHorizenListViewTile(child);
+    return liquidTile(context, child);
+  }
+  @override
+  Widget AppTitle({required String child}) {
+    // TODO: implement AppTitle
+    return Text(child,style: liquidtext );
   }
 
 }
