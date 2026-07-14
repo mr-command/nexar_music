@@ -48,9 +48,9 @@ final designSYstemProvider = Provider(
     }
   }
 );
-final currentSongProvider = Provider<Song?>((ref) {
-  return null;
-});
+// final currentSongProvider = StateProvider<Song?>((ref) {
+//   return null;
+// });
 
 
 final isplayinProvider = StateProvider<bool>(

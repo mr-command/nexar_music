@@ -15,11 +15,13 @@ Widget liquidPauseButton(Player player, AudioServices audio,WidgetRef ref){
     onPressed: (){
       if(player.state.playing){
         audio.pauseMusic();
+        ref.read(isplayinProvider.notifier).state = !player.state.playing;
       } else {
         audio.conMusic();
+        ref.read(isplayinProvider.notifier).state = !player.state.playing;
       }
     },
-    icon: playing
+    icon: playing == true
     ? Icon(Icons.pause)
     : Icon(Icons.play_arrow),
 

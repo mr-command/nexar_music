@@ -22,6 +22,7 @@ class HomeScreen extends ConsumerWidget {
     final audio = ref.read(audioServiceProvider);
     final currentSong = ref.watch(nowPlaying);
     final design = ref.watch(designSYstemProvider);
+    final playing = ref.watch(isplayinProvider);
 
 
     List<String> musics = getMusicsDirectory();
@@ -113,14 +114,16 @@ class HomeScreen extends ConsumerWidget {
                      child: ListView.builder(
                       itemCount: musics.length,
                       itemBuilder: (context, index) {
-                        final currentSong = ref.watch(currentSongProvider);
-                        final isCurrentSong = currentSong?.path == musics[index];
                         final tags = readMetadata(File(musics[index]), getImage: true);
                         final song = Song(
                           id: index,
                           path: musics[index],
                           metadata: tags,
                         );
+
+                        
+                        final currentSong = ref.watch(nowPlaying);
+                        final isCurrentSong = currentSong?.path == song.path;
                         
                         
                         
@@ -183,7 +186,7 @@ class HomeScreen extends ConsumerWidget {
                                       ref.read(nowPlaying.notifier).state = song;
                                       toggleMusicState(audio,player,musics,index);
                                     },
-                                     icon: isCurrentSong
+                                     icon: isCurrentSong && playing
                                      ? Icon(Icons.pause,size: 30,color: Colors.white,)
                                      : Icon(Icons.play_arrow,size: 30,color: Colors.white,)
                                     ),
