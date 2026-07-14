@@ -8,10 +8,12 @@ this music player is getting better
   - Neumorphism design
   - liquid glass design
   - controll pre and next music from the playlist
+  - real-time icons
+  - toggle between themes
 
 
 ## Teach Stack
   - flutter riverpod
   - media kit
   - metadata reader
-  - 
+
