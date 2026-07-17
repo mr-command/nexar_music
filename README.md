@@ -21,5 +21,4 @@ this music player is getting better
 
 | HomePage |
 |------|
-| ![](assets/images/Screenshot from 2026-07-13 20-36-28.png) | 
-<img src"assets/images/Screenshot from 2026-07-13 20-36-28.png">
+| ![](assets/images/home.png) | 
