@@ -17,3 +17,6 @@ this music player is getting better
   - media kit
   - metadata reader
 
+## screenShots
+
+<img src"assets/images/Screenshot from 2026-07-13 20-36-28.png">
