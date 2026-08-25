@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'screens/HomeScreen.dart';
 import 'package:media_kit/media_kit.dart';
 
+import 'screens/home_screen.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   MediaKit.ensureInitialized();
-  runApp(ProviderScope(child: MyApp()));
+  runApp(const ProviderScope(child: NexarApp()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class NexarApp extends StatelessWidget {
+  const NexarApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Nexar',
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF7C3AED),
+        ),
+        fontFamilyFallback: const ['Segoe UI', 'Ubuntu', 'Roboto'],
+      ),
+      home: const HomeScreen(),
     );
   }
 }
