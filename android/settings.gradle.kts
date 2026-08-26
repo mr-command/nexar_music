@@ -18,9 +18,10 @@ pluginManagement {
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
-        maven("https://en-mirror.ir")
         google()
         mavenCentral()
+        // Fallback mirror for networks where Google/Maven Central are unreachable.
+        maven("https://en-mirror.ir")
         gradlePluginPortal()
     }
 }

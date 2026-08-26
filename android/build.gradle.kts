@@ -2,6 +2,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Fallback mirror for networks where Google/Maven Central are unreachable.
+        maven("https://en-mirror.ir")
     }
 }
 
