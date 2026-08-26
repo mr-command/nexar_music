@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/design_system.dart';
 import 'audio_service.dart';
@@ -106,19 +107,42 @@ final favoritesProvider =
 });
 
 class FavoritesNotifier extends StateNotifier<Set<String>> {
-  FavoritesNotifier() : super(const <String>{});
+  static const String _favoritesKey = 'favorite_music';
 
-  void toggle(String path) {
+  FavoritesNotifier() : super(<String>{}) {
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final favorites = prefs.getStringList(_favoritesKey) ?? [];
+
+    state = favorites.toSet();
+  }
+
+  Future<void> toggle(String path) async {
     final next = Set<String>.of(state);
+
     if (next.contains(path)) {
       next.remove(path);
     } else {
       next.add(path);
     }
+
     state = next;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setStringList(
+      _favoritesKey,
+      next.toList(),
+    );
   }
 
-  bool isFavorite(String path) => state.contains(path);
+  bool isFavorite(String path) {
+    return state.contains(path);
+  }
 }
 
 // ---------------------------------------------------------------------------

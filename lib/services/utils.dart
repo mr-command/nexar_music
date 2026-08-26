@@ -16,40 +16,61 @@ const audioExtensions = <String>[
 ///
 /// Fixes the old bug where `Platform.environment['HOME']!` crashed on Windows
 /// (Windows has no HOME variable).
-Directory? musicDirectory() {
+List<Directory> musicDirectories() {
   final env = Platform.environment;
   final home = env['HOME'] ?? env['USERPROFILE'];
-  if (home == null || home.isEmpty) return null;
-  return Directory('$home/Music');
+  if (home == null || home.isEmpty) return [];
+  return [
+    Directory('$home/Music'),
+    Directory('/storage/emulated/0/Music/'),
+    Directory('/storage/emulated/0/Download/'),
+  ];
 }
 
-String musicDirectoryLabel() => musicDirectory()?.path ?? '~/Music';
+String musicDirectoryLabel() {
+  return musicDirectories().length < 2
+      ? '~/Music'
+      : 'Multiple directories';
+}
 
 /// Scans the music directory recursively and returns sorted file paths.
 ///
 /// Returns an empty list when the directory does not exist — the old code
 /// returned the fake path `'list is empty'`, which later crashed playback.
 Future<List<String>> scanAudioFiles() async {
-  final root = musicDirectory();
-  if (root == null || !root.existsSync()) return [];
-  try {
-    final paths = await root
-        .list(recursive: true, followLinks: false)
-        .where((entity) => entity is File)
-        .cast<File>()
-        .where(
-          (file) => audioExtensions.contains(
-            extensionOf(file.path).toLowerCase(),
-          ),
-        )
-        .map((file) => file.path)
-        .toList();
-    paths.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    return paths;
-  } catch (_) {
-    // Corrupted or unreadable directory: treat as empty instead of crashing.
-    return [];
+  final roots = musicDirectories();
+  final paths = <String>[];
+
+  for (final root in roots) {
+    if (!root.existsSync()) continue;
+
+    try {
+      final files = await root
+          .list(
+            recursive: true,
+            followLinks: false,
+          )
+          .where((entity) => entity is File)
+          .cast<File>()
+          .where(
+            (file) => audioExtensions.contains(
+              extensionOf(file.path).toLowerCase(),
+            ),
+          )
+          .map((file) => file.path)
+          .toList();
+
+      paths.addAll(files);
+    } catch (_) {
+      continue;
+    }
   }
+
+  paths.sort(
+    (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
+  );
+
+  return paths;
 }
 
 String extensionOf(String path) {

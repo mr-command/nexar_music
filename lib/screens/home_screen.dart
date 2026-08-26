@@ -160,12 +160,12 @@ class _HeaderState extends ConsumerState<_Header> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              IconButton(
-                tooltip: 'Refresh library',
-                onPressed: () => ref.invalidate(libraryProvider),
-                icon:
-                    Icon(Icons.refresh_rounded, color: design.textSecondary),
-              ),
+              // IconButton(
+              //   tooltip: 'Refresh library',
+              //   onPressed: () => ref.invalidate(libraryProvider),
+              //   icon:
+              //       Icon(Icons.refresh_rounded, color: design.textSecondary),
+              // ),
               // if (compact) _ThemeMenu(design: design),
             ],
           ),
@@ -180,7 +180,7 @@ class _HeaderState extends ConsumerState<_Header> {
                   style: design.titleStyle,
                   cursorColor: design.accent,
                   decoration: InputDecoration(
-                    hintText: 'Search songs, artists, albums…',
+                    hintText: 'Search songs or anything else IDK ...',
                     hintStyle: design.subtitleStyle,
                     prefixIcon: Icon(Icons.search_rounded,
                         color: design.textSecondary),
