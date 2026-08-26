@@ -13,15 +13,15 @@ Some features are experimental or unfinished and may change over time.»
 
 Home
 
- (screenshots/home.jpg)
+![Home](screenshots/home.jpg)
 
 Now Playing
 
-(screenshots/nowplaying.jpg)
+![current](screenshots/nowplaying.jpg)
 
 Favorites 
 
-(screenshots/favorites.jpg)
+![favorites](screenshots/favorites.jpg)
 
 ---
 
