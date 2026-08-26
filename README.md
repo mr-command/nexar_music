@@ -1,4 +1,4 @@
-🎵 Nexar Music
+# Nexar Music
 
 A modern, lightweight local music player built with Flutter.
 
@@ -9,7 +9,7 @@ Some features are experimental or unfinished and may change over time.»
 
 ---
 
-📸 Screenshots
+## Screenshots
 
 «Screenshots will be added here soon.»
 
@@ -27,9 +27,9 @@ Library
 
 ---
 
-✨ Features
+## Features
 
-🎶 Local Music Library
+### Local Music Library
 
 Nexar Music scans music files stored on your device and builds a local library from them.
 
@@ -48,7 +48,7 @@ The goal is to make opening the app feel instant instead of rescanning everythin
 
 ---
 
-⚡ Fast Library Loading
+## Fast Library Loading
 
 One of the things I wanted to avoid was making the user wait for the entire library to load.
 
@@ -60,7 +60,7 @@ This makes subsequent launches significantly faster than doing a full scan every
 
 ---
 
-🎧 Background Playback
+## Background Playback
 
 Android background playback is supported using "media_kit" and "audio_service".
 
@@ -83,7 +83,7 @@ The notification can display:
 
 ---
 
-🖼️ Artwork
+## Artwork
 
 Album artwork is loaded lazily instead of loading every image immediately.
 
@@ -93,7 +93,7 @@ Artwork used by the Android media notification can also be cached separately.
 
 ---
 
-🎨 Neumorphic UI
+## Neumorphic UI
 
 The current interface is based around a Neumorphic design.
 
@@ -103,7 +103,7 @@ The interface also adapts to different screen sizes, so the desktop layout doesn
 
 ---
 
-🪟 Responsive Layout
+## Responsive Layout
 
 The layout changes depending on the available screen width.
 
@@ -113,7 +113,7 @@ This allows the same codebase to work across desktop and mobile form factors.
 
 ---
 
-❤️ Favorites
+## Favorites
 
 Songs can be marked as favorites.
 
@@ -121,13 +121,13 @@ Favorite state is persisted locally, so restarting the application doesn't reset
 
 ---
 
-🔎 Search
+## Search
 
 A simple search system is included for quickly finding songs in the local library.
 
 ---
 
-↕️ Sorting
+## Sorting
 
 The library can be sorted according to the available sorting options.
 
@@ -147,7 +147,7 @@ More keyboard shortcuts may be added later.
 
 ---
 
-🛠️ Tech Stack
+## Tech Stack
 
 Nexar Music is built with Flutter and uses a few packages that handle the parts that would otherwise be unnecessarily complicated to implement from scratch.
 
@@ -168,7 +168,7 @@ flutter_launcher_icons| Application icons
 
 ---
 
-🏗️ Project Structure
+## Project Structure
 
 The project is split into a few main areas:
 
@@ -199,7 +199,7 @@ Most of the application logic lives inside "services/", while reusable UI compon
 
 ---
 
-🧠 A Little About the Architecture
+## A Little About the Architecture
 
 I tried to keep the application reasonably modular instead of putting everything inside the screens.
 
@@ -231,7 +231,7 @@ Artwork is loaded only when needed and cached in memory to avoid repeatedly read
 
 ---
 
-📱 Supported Platforms
+## Supported Platforms
 
 Currently the project is mainly focused on:
 
@@ -246,7 +246,7 @@ iOS support is not currently the main focus of the project and may require addit
 
 ---
 
-🚀 Getting Started
+## Getting Started
 
 Requirements
 
@@ -289,7 +289,7 @@ flutter run -d android
 
 ---
 
-📦 Building
+## Building
 
 Android
 
@@ -315,7 +315,7 @@ flutter build macos --release
 
 ---
 
-🗺️ Roadmap
+## Roadmap
 
 Nexar Music is still evolving, so this list will probably change.
 
@@ -472,4 +472,4 @@ Some of the screenshots I'd like to include:
 
 ---
 
-Nexar Music — a music player built with Flutter, one feature at a time. 🎵 
+Nexar Music — a music player built with Flutter, one feature at a time.
