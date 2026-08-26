@@ -11,19 +11,17 @@ Some features are experimental or unfinished and may change over time.»
 
 ## Screenshots
 
-«Screenshots will be added here soon.»
-
 Home
 
-"Nexar Music Home" (screenshots/home.png)
+ (screenshots/home.jpg)
 
 Now Playing
 
-"Nexar Music Now Playing" (screenshots/now-playing.png)
+(screenshots/nowplaying.jpg)
 
-Library
+Favorites 
 
-"Nexar Music Library" (screenshots/library.png)
+(screenshots/favorites.jpg)
 
 ---
 
