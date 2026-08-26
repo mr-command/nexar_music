@@ -1,5 +1,8 @@
 package com.example.nexar_app
 
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 
-class MainActivity : FlutterActivity()
+// Extending AudioServiceActivity routes lifecycle through the media playback
+// foreground service, so audio keeps running undistorted with the screen
+// locked / app in background.
+class MainActivity : AudioServiceActivity()

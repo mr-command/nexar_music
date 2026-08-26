@@ -3,11 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
 
 import 'screens/home_screen.dart';
+import 'services/audio_handler.dart';
+import 'services/providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
-  runApp(const ProviderScope(child: NexarApp()));
+
+  // The media session (background playback + notification) must exist before
+  // the first track is opened, so build it ahead of the widget tree.
+  final player = Player();
+  final handler = await NexarAudioHandler.init(player);
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        playerProvider.overrideWithValue(player),
+        audioHandlerProvider.overrideWithValue(handler),
+      ],
+      child: const NexarApp(),
+    ),
+  );
 }
 
 class NexarApp extends StatelessWidget {

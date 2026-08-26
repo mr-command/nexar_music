@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'dart:isolate';
+
+import 'models.dart';
 
 /// Supported audio file extensions.
 const audioExtensions = <String>[
@@ -53,9 +56,11 @@ List<Directory> musicDirectories() {
   final env = Platform.environment;
   final dirs = <Directory>[];
 
-  void add(String path) {
-    if (path.isEmpty) return;
-    final dir = Directory(path);
+  void add(String rawPath) {
+    if (rawPath.isEmpty) return;
+    final dir = Directory(_canonicalDirPath(rawPath));
+    // Same physical directory must never be registered twice (e.g. XDG
+    // Music == ~/Music), or its songs would be listed multiple times.
     if (!dirs.any((d) => d.path == dir.path)) dirs.add(dir);
   }
 
@@ -89,17 +94,33 @@ List<Directory> musicDirectories() {
 /// Mounted removable volumes on Android look like `/storage/XXXX-XXXX`.
 Iterable<String> _mountedAndroidVolumes() sync* {
   try {
+    final emulatedRoot = _canonicalDirPath('/storage/emulated/0');
     for (final entity in Directory('/storage').listSync(followLinks: false)) {
       if (entity is! Directory) continue;
       final name = pathBaseName(entity.path);
       if (name == 'emulated' || name == 'self') continue;
       if (RegExp(r'^[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}$').hasMatch(name)) {
-        yield entity.path;
+        final canonical = _canonicalDirPath(entity.path);
+        // Some ROMs expose the internal emulated storage under its volume
+        // UUID as well — that would duplicate the whole library.
+        if (canonical == emulatedRoot) continue;
+        yield canonical;
       }
     }
   } catch (_) {
     // /storage is not accessible on some devices — nothing to do.
   }
+}
+
+/// Normalizes a directory path for identity comparison: absolute form with
+/// separators and trailing slash normalized, without resolving symlinks
+/// (unavailable/pointless across platforms; keeps the call cheap & safe).
+String _canonicalDirPath(String path) {
+  var p = Directory(path).absolute.path;
+  if (p.length > 1 && (p.endsWith('/') || p.endsWith(r'\'))) {
+    p = p.substring(0, p.length - 1);
+  }
+  return Platform.isWindows ? p.replaceAll('\\', '/').toLowerCase() : p;
 }
 
 String musicDirectoryLabel() {
@@ -121,7 +142,14 @@ Future<List<String>> scanAudioFiles() async {
     [for (final root in roots) _scanRoot(root)],
   );
 
-  final paths = <String>[for (final batch in results) ...batch];
+  // Overlapping mounts (e.g. an SD-card path also visible under the primary
+  // storage) would otherwise push every shared song twice into the library.
+  final seen = <String>{};
+  final paths = [
+    for (final batch in results)
+      for (final path in batch)
+        if (seen.add(path)) path,
+  ];
 
   paths.sort(
     (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
@@ -214,3 +242,77 @@ String formatDuration(Duration? duration) {
   }
   return '${two(duration.inMinutes)}:${two(duration.inSeconds.remainder(60))}';
 }
+
+// ---------------------------------------------------------------------------
+// Fast file stamping (cache identity + "Date added" sorting)
+// ---------------------------------------------------------------------------
+
+/// Modification time and size of one file. Both values together act as the
+/// fingerprint deciding whether a cached metadata entry is still valid.
+typedef FileStamp = ({int modifiedMs, int size});
+
+/// Stamps every path in a background isolate — thousands of stat() calls at
+/// once keeps the UI thread free during warm starts.
+Future<Map<String, FileStamp>> stampFiles(List<String> paths) {
+  if (paths.isEmpty) return Future.value(const <String, FileStamp>{});
+  return Isolate.run(() {
+    final stamps = <String, FileStamp>{};
+    for (final path in paths) {
+      try {
+        final stat = File(path).statSync();
+        stamps[path] = (
+          modifiedMs: stat.modified.millisecondsSinceEpoch,
+          size: stat.size,
+        );
+      } catch (_) {
+        // Vanished between scan and stamp — excluded from this session.
+      }
+    }
+    return stamps;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Sorting
+// ---------------------------------------------------------------------------
+
+/// Fields the library can be sorted by.
+enum SortField { title, artist, album, duration, dateAdded }
+
+extension SortFieldLabel on SortField {
+  String get label => switch (this) {
+        SortField.title => 'Title',
+        SortField.artist => 'Artist',
+        SortField.album => 'Album',
+        SortField.duration => 'Duration',
+        SortField.dateAdded => 'Date added',
+      };
+}
+
+/// Active sort configuration.
+class SortSpec {
+  const SortSpec(this.field, {this.ascending = true});
+
+  final SortField field;
+  final bool ascending;
+
+  int compare(Song a, Song b) {
+    var result = switch (field) {
+      SortField.title =>
+        _fold(a.title).compareTo(_fold(b.title)),
+      SortField.artist =>
+        _fold(a.artist).compareTo(_fold(b.artist)),
+      SortField.album =>
+        _fold(a.album ?? '').compareTo(_fold(b.album ?? '')),
+      SortField.duration =>
+        (a.duration ?? Duration.zero).compareTo(b.duration ?? Duration.zero),
+      SortField.dateAdded => (a.dateModified?.millisecondsSinceEpoch ?? 0)
+            .compareTo(b.dateModified?.millisecondsSinceEpoch ?? 0),
+    };
+    if (result == 0) result = _fold(a.path).compareTo(_fold(b.path));
+    return ascending ? result : -result;
+  }
+
+  static String _fold(String value) => value.toLowerCase();
+}
+

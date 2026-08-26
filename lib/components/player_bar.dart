@@ -191,7 +191,7 @@ class MiniPlayerBar extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(14, 2, 10, 12),
                 child: Row(
                   children: [
-                    AlbumArt(artwork: song.artwork, size: 44, radius: 10),
+                    AlbumArt(song: song, size: 44, radius: 10),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

@@ -19,6 +19,9 @@ abstract class DesignSystem {
   Color get textSecondary;
   Color get dividerColor;
 
+  /// Opaque color for popup menus/sheets overlaid on top of everything.
+  Color get menuColor;
+
   TextStyle get headingStyle;
   TextStyle get titleStyle;
   TextStyle get subtitleStyle;
@@ -38,6 +41,9 @@ abstract class DesignSystem {
 
 class NeumorphismDesign extends DesignSystem {
   const NeumorphismDesign();
+
+  /// Raw accent as an int, shared with the native notification styling.
+  static const int accentValue = 0xFF7C3AED;
 
   static const _bg = Color(0xFFE9E2F2);
   static const _surface = Color(0xFFF4EFFA);
@@ -72,6 +78,9 @@ class NeumorphismDesign extends DesignSystem {
 
   @override
   Color get dividerColor => const Color(0xFFD5CCDF);
+
+  @override
+  Color get menuColor => _surface;
 
   @override
   TextStyle get headingStyle => const TextStyle(
@@ -156,6 +165,9 @@ class LiquidGlassDesign extends DesignSystem {
 
   @override
   Color get dividerColor => Colors.white.withAlpha(56);
+
+  @override
+  Color get menuColor => const Color(0xFF201A2E);
 
   @override
   TextStyle get headingStyle => const TextStyle(

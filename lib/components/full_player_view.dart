@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/providers.dart';
-import 'design_system.dart';
 import 'player_bar.dart';
+import 'song_tile.dart';
 
 /// Full-featured now-playing view. Used inside the modal sheet (mobile) and
 /// the right-hand panel (desktop).
@@ -57,17 +57,7 @@ class FullPlayerView extends ConsumerWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: song.artwork != null
-            ? Image.memory(
-                song.artwork!,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                errorBuilder: (_, _, _) => _placeholderArt(design),
-              )
-            : _placeholderArt(design),
-      ),
+      child: AlbumArt(song: song, size: artSize, radius: 28),
     );
 
     return SingleChildScrollView(
@@ -110,14 +100,4 @@ class FullPlayerView extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _placeholderArt(DesignSystem design) => Container(
-        color: design.controlBackground,
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.album_rounded,
-          size: 96,
-          color: design.textSecondary,
-        ),
-      );
 }

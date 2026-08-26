@@ -9,33 +9,43 @@ import '../services/utils.dart';
 import 'design_system.dart';
 
 /// Reusable album-art widget with graceful fallback.
-class AlbumArt extends StatelessWidget {
+///
+/// Artwork bytes are loaded lazily through [artworkProvider] (background
+/// isolate + LRU memory cache), so scrolling stays smooth even in huge
+/// libraries and the decoded bitmap is downsampled to the rendered size.
+class AlbumArt extends ConsumerWidget {
   const AlbumArt({
     super.key,
-    this.artwork,
+    required this.song,
     this.size = 48,
     this.radius = 12,
   });
 
-  final Uint8List? artwork;
+  final Song song;
   final double size;
   final double radius;
 
   @override
-  Widget build(BuildContext context) {
-    final design = ProviderScope.containerOf(context).read(designProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final design = ref.watch(designProvider);
+    final artwork = ref.watch(artworkProvider(song.path)).value;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: SizedBox(
         width: size,
         height: size,
-        child: artwork != null
+        child: artwork != null && artwork.isNotEmpty
             ? Image.memory(
-                artwork!,
+                key: ValueKey(song.path),
+                artwork,
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
                 gaplessPlayback: true,
+                // Decode at display resolution — keeps memory per tile tiny.
+                cacheWidth:
+                    (size * MediaQuery.devicePixelRatioOf(context)).round(),
                 errorBuilder: (_, _, _) => _placeholder(design),
               )
             : _placeholder(design),
@@ -96,11 +106,31 @@ class SongTile extends ConsumerWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () => _onTap(ref, song, isCurrent),
+          // Diagnostics: reveals where this entry physically lives, so
+          // real on-disk copies are distinguishable from scan bugs.
+          onLongPress: () => showDialog<void>(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: design.menuColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Text('File location', style: design.titleStyle),
+              content: Text(song.path,
+                  style: design.subtitleStyle.copyWith(fontSize: 11)),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Close', style: design.subtitleStyle),
+                ),
+              ],
+            ),
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
-                AlbumArt(artwork: song.artwork),
+                AlbumArt(song: song),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -158,4 +188,9 @@ class SongTile extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Raw art bytes when callers need them directly (kept for symmetry/tests).
+Future<Uint8List?> loadArtworkBytes(WidgetRef ref, String path) {
+  return ref.read(artworkProvider(path).future);
 }

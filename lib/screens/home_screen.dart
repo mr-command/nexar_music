@@ -11,7 +11,6 @@ import '../components/song_tile.dart';
 import '../services/models.dart';
 import '../services/providers.dart';
 import '../services/utils.dart';
-
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -129,6 +128,9 @@ class _HeaderState extends ConsumerState<_Header> {
     final favoritesOnly = ref.watch(favoritesOnlyProvider);
     final compact = widget.compact;
     final songCount = widget.songCount;
+    final scanActive = ref.watch(
+      libraryControllerProvider.select((state) => state.isBusy),
+    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(compact ? 16 : 24, 16, compact ? 16 : 24, 8),
@@ -160,13 +162,29 @@ class _HeaderState extends ConsumerState<_Header> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              // IconButton(
-              //   tooltip: 'Refresh library',
-              //   onPressed: () => ref.invalidate(libraryProvider),
-              //   icon:
-              //       Icon(Icons.refresh_rounded, color: design.textSecondary),
-              // ),
-              // if (compact) _ThemeMenu(design: design),
+              if (scanActive)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: SizedBox.square(
+                    dimension: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: design.accent,
+                    ),
+                  ),
+                ),
+              IconButton.filledTonal(
+                tooltip: 'Refresh library',
+                onPressed: () =>
+                    ref.read(libraryControllerProvider.notifier).refresh(),
+                style: IconButton.styleFrom(
+                  backgroundColor: design.controlBackground,
+                ),
+                icon:
+                    Icon(Icons.refresh_rounded, color: design.textPrimary),
+              ),
+              const SizedBox(width: 8),
+              SortMenu(design: design),
             ],
           ),
           const SizedBox(height: 14),
@@ -295,6 +313,93 @@ class _FilterChip extends ConsumerWidget {
 //     );
 //   }
 // }
+
+/// Sort selector matching the app's visual language: pill-shaped trigger,
+/// rounded frosted menu, accent checkmarks and a direction toggle.
+class SortMenu extends ConsumerWidget {
+  const SortMenu({super.key, required this.design});
+
+  final DesignSystem design;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sort = ref.watch(sortProvider);
+    return PopupMenuButton<SortField?>(
+      tooltip: 'Sort songs',
+      color: design.menuColor,
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      position: PopupMenuPosition.under,
+      onSelected: (field) {
+        if (field == null) {
+          ref.read(sortProvider.notifier).toggleDirection();
+        } else {
+          ref.read(sortProvider.notifier).setField(field);
+        }
+      },
+      itemBuilder: (context) => [
+        for (final field in SortField.values)
+          PopupMenuItem(
+            value: field,
+            child: Row(
+              children: [
+                Icon(
+                  field == sort.field
+                      ? Icons.check_rounded
+                      : Icons.radio_button_unchecked,
+                  size: 18,
+                  color:
+                      field == sort.field ? design.accent : design.textSecondary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    field.label,
+                    style: design.titleStyle.copyWith(
+                      color: field == sort.field
+                          ? design.accent
+                          : design.textPrimary,
+                    ),
+                  ),
+                ),
+                if (field == sort.field)
+                  Icon(
+                    sort.ascending
+                        ? Icons.arrow_upward_rounded
+                        : Icons.arrow_downward_rounded,
+                    size: 16,
+                    color: design.accent,
+                  ),
+              ],
+            ),
+          ),
+        const PopupMenuDivider(),
+        const PopupMenuItem<SortField?>(
+          value: null,
+          child: _ReverseOrderRow(),
+        ),
+      ],
+      style: IconButton.styleFrom(backgroundColor: design.controlBackground),
+      icon: Icon(Icons.sort_rounded, color: design.textPrimary),
+    );
+  }
+}
+
+class _ReverseOrderRow extends ConsumerWidget {
+  const _ReverseOrderRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final design = ref.watch(designProvider);
+    return Row(
+      children: [
+        Icon(Icons.swap_vert_rounded, size: 18, color: design.textSecondary),
+        const SizedBox(width: 10),
+        Text('Reverse order', style: design.subtitleStyle),
+      ],
+    );
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Side navigation (desktop / tablet)
@@ -481,40 +586,58 @@ class _LibraryView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final library = ref.watch(libraryProvider);
+    final design = ref.watch(designProvider);
+    final state = ref.watch(libraryControllerProvider);
     final favoritesOnly = ref.watch(favoritesOnlyProvider);
 
-    return library.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => _Message(
+    if (state.error != null && songs.isEmpty && !state.parsing) {
+      return _Message(
         icon: Icons.error_outline_rounded,
         title: 'Could not read your music folder',
-        message: '$error',
-      ),
-      data: (_) {
-        if (songs.isEmpty) {
-          if (favoritesOnly) {
-            return const _Message(
-              icon: Icons.favorite_border_rounded,
-              title: 'No favorites yet',
-              message:
-                  'Tap the heart on any track to add it to your favorites.',
-            );
-          }
-          return _Message(
-            icon: Icons.library_music_rounded,
-            title: 'Your library is empty',
-            message:
-                'Add audio files to ${musicDirectoryLabel()} and hit refresh.',
-          );
-        }
-        return ListView.builder(
-          padding: const EdgeInsets.only(top: 4, bottom: 110),
-          itemCount: songs.length,
-          itemBuilder: (context, index) =>
-              SongTile(queue: songs, index: index),
+        message: '${state.error}',
+      );
+    }
+    if (state.scanning && songs.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (songs.isEmpty) {
+      if (favoritesOnly) {
+        return const _Message(
+          icon: Icons.favorite_border_rounded,
+          title: 'No favorites yet',
+          message:
+              'Tap the heart on any track to add it to your favorites.',
         );
-      },
+      }
+      return _Message(
+        icon: Icons.library_music_rounded,
+        title: 'Your library is empty',
+        message:
+            'Add audio files to ${musicDirectoryLabel()} and hit refresh.',
+      );
+    }
+
+    return Column(
+      children: [
+        // Slim accent bar while background tags are still streaming in —
+        // the list itself is already usable (placeholders fill instantly).
+        if (state.parsing)
+          SizedBox(
+            height: 2,
+            child: LinearProgressIndicator(
+              color: design.accent,
+              backgroundColor: design.dividerColor,
+            ),
+          ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.only(top: 4, bottom: 110),
+            itemCount: songs.length,
+            itemBuilder: (context, index) =>
+                SongTile(queue: songs, index: index),
+          ),
+        ),
+      ],
     );
   }
 }
