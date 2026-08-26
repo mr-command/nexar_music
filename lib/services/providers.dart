@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/design_system.dart';
@@ -93,6 +96,11 @@ final currentSongProvider = Provider<Song?>((ref) {
 // ---------------------------------------------------------------------------
 
 final libraryProvider = FutureProvider<List<Song>>((ref) async {
+  // Android 6+ needs the audio permission granted at runtime before
+  // shared storage can be listed; desktop platforms need nothing.
+  if (Platform.isAndroid) {
+    await [Permission.audio, Permission.storage].request();
+  }
   final paths = await scanAudioFiles();
   return Song.loadLibrary(paths);
 });
