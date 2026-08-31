@@ -19,6 +19,8 @@ class NexarAudioHandler extends BaseAudioHandler {
   /// Snapshot of the queue passed to the last playQueue call
   List<Song> _songs = const <Song>[];
 
+  String? _lastTrackUri;
+
   // ========== Shuffle & Loop state ==========
   AudioServiceRepeatMode _repeatMode = AudioServiceRepeatMode.none;
   AudioServiceShuffleMode _shuffleMode = AudioServiceShuffleMode.none;
@@ -61,6 +63,22 @@ class NexarAudioHandler extends BaseAudioHandler {
     _publishQueue();
     _sync();
     _publishMediaItem();
+    final playlist = _player.state.playlist;
+    final index = playlist.index;
+    final uri = (index >= 0 && index < playlist.medias.length)
+        ? playlist.medias[index].uri
+        : null;
+    final changed = uri != null && uri != _lastTrackUri;
+    _lastTrackUri = uri;
+    if (changed) {
+      unawaited(_cycleAfterTrackChange());
+    }
+  }
+
+  Future<void> _cycleAfterTrackChange() async {
+    if (!_player.state.playing) return;
+    await _player.pause();
+    await _player.play();
   }
 
   void _publishQueue() {

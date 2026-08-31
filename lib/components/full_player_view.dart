@@ -63,7 +63,8 @@ class FullPlayerView extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(24),topRight: Radius.circular(24)),
+        
+        borderRadius: BorderRadius.vertical(top:Radius.circular(24)),
         color: design.menuColor
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),

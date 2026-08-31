@@ -25,6 +25,7 @@ class NowPlayingSheet extends ConsumerWidget {
       decoration: BoxDecoration(
         color: design.menuColor,
         borderRadius: BorderRadius.vertical(
+          
           top: Radius.circular(wide ? 32 : 28),
         ),
       ),
