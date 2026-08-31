@@ -408,14 +408,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "6.1.0"
-  liquid_glass_bridge:
-    dependency: "direct main"
-    description:
-      name: liquid_glass_bridge
-      sha256: "208d3cdb7526439d11cf4bfe67b14922f32fa58fc6d5d1d6de61a66e89dc1abe"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.2.1"
   logging:
     dependency: transitive
     description:

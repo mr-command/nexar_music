@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../components/full_player_view.dart';
@@ -15,17 +16,15 @@ class NowPlayingSheet extends ConsumerWidget {
     final wide = size.width >= 720;
 
     final sheet = Container(
-      margin: EdgeInsets.fromLTRB(
-        wide ? (size.width - 520) / 2 : 0,
-        wide ? 24 : 0,
-        wide ? (size.width - 520) / 2 : 0,
-        0,
-      ),
+      // margin: EdgeInsets.fromLTRB(
+      //   wide ? (size.width - 520) / 2 : 0,
+      //   wide ? 24 : 0,
+      //   wide ? (size.width - 520) / 2 : 0,
+      //   0,
+      // ),
       constraints: BoxConstraints(maxHeight: size.height * 0.92),
       decoration: BoxDecoration(
-        color: design.hasBackdropImage
-            ? const Color(0xE6151220)
-            : design.scaffoldBackground,
+        color: design.menuColor,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(wide ? 32 : 28),
         ),

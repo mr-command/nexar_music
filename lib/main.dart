@@ -20,6 +20,7 @@ Future<void> main() async {
       overrides: [
         playerProvider.overrideWithValue(player),
         audioHandlerProvider.overrideWithValue(handler),
+        
       ],
       child: const NexarApp(),
     ),

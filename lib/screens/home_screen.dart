@@ -1,16 +1,17 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexar_app/features/library/viewmodel/lib_providers.dart';
+import 'package:nexar_app/sections/sidenav.dart';
 
-import '../components/design_system.dart';
+import '../sections/homescreen_header.dart';
 import '../components/full_player_view.dart';
 import '../components/player_bar.dart';
 import '../components/song_tile.dart';
 import '../services/models.dart';
 import '../services/providers.dart';
 import '../services/utils.dart';
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -41,7 +42,7 @@ class HomeScreen extends ConsumerWidget {
 
                 final content = Column(
                   children: [
-                    _Header(
+                    Header(
                       compact: !showSideNav,
                       songCount: visibleSongs.length,
                     ),
@@ -59,16 +60,20 @@ class HomeScreen extends ConsumerWidget {
                     child: showSideNav
                         ? Row(
                             children: [
-                              _SideNav(expanded: showPanel),
+                              SideNav(expanded: showPanel),
                               Expanded(child: content),
                               if (showPanel)
                                 SizedBox(
                                   width: 360,
                                   child: Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(0, 12, 12, 12),
-                                    child: design.glass(
-                                      radius: 28,
+                                    padding: const EdgeInsets.fromLTRB(
+                                      0,
+                                      12,
+                                      12,
+                                      12,
+                                    ),
+                                    child: Container(
+                                      // radius: 28,
                                       color: design.hasBackdropImage
                                           ? null
                                           : design.surfaceColor,
@@ -87,490 +92,6 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       bottomNavigationBar: const MiniPlayerBar(),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Header (search + filters + theme switcher)
-// ---------------------------------------------------------------------------
-
-class _Header extends ConsumerStatefulWidget {
-  const _Header({required this.compact, required this.songCount});
-
-  final bool compact;
-  final int songCount;
-
-  @override
-  ConsumerState<_Header> createState() => _HeaderState();
-}
-
-class _HeaderState extends ConsumerState<_Header> {
-  late final TextEditingController _searchController;
-
-  @override
-  void initState() {
-    super.initState();
-    _searchController = TextEditingController(
-      text: ref.read(searchQueryProvider),
-    );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final design = ref.watch(designProvider);
-    final favoritesOnly = ref.watch(favoritesOnlyProvider);
-    final compact = widget.compact;
-    final songCount = widget.songCount;
-    final scanActive = ref.watch(
-      libraryControllerProvider.select((state) => state.isBusy),
-    );
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(compact ? 16 : 24, 16, compact ? 16 : 24, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [design.accent, design.accent.withAlpha(130)],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.graphic_eq_rounded,
-                    color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Text('Nexar', style: design.headingStyle),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  '$songCount tracks',
-                  style: design.subtitleStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (scanActive)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: SizedBox.square(
-                    dimension: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: design.accent,
-                    ),
-                  ),
-                ),
-              IconButton.filledTonal(
-                tooltip: 'Refresh library',
-                onPressed: () =>
-                    ref.read(libraryControllerProvider.notifier).refresh(),
-                style: IconButton.styleFrom(
-                  backgroundColor: design.controlBackground,
-                ),
-                icon:
-                    Icon(Icons.refresh_rounded, color: design.textPrimary),
-              ),
-              const SizedBox(width: 8),
-              SortMenu(design: design),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (value) =>
-                      ref.read(searchQueryProvider.notifier).state = value,
-                  style: design.titleStyle,
-                  cursorColor: design.accent,
-                  decoration: InputDecoration(
-                    hintText: 'Search songs or anything else IDK ...',
-                    hintStyle: design.subtitleStyle,
-                    prefixIcon: Icon(Icons.search_rounded,
-                        color: design.textSecondary),
-                    isDense: true,
-                    filled: true,
-                    fillColor: design.surfaceColor,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              IconButton.filledTonal(
-                tooltip: 'Shuffle all',
-                onPressed: songCount == 0
-                    ? null
-                    : () => ref.read(audioServiceProvider).playQueue(
-                          ref.read(visibleSongsProvider),
-                          startIndex: Random().nextInt(songCount),
-                        ),
-                style: IconButton.styleFrom(
-                  backgroundColor: design.controlBackground,
-                ),
-                icon: Icon(Icons.shuffle_rounded, color: design.textPrimary),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              _FilterChip(
-                label: 'All music',
-                selected: !favoritesOnly,
-                onTap: () =>
-                    ref.read(favoritesOnlyProvider.notifier).state = false,
-              ),
-              const SizedBox(width: 8),
-              _FilterChip(
-                label: 'Favorites',
-                selected: favoritesOnly,
-                onTap: () =>
-                    ref.read(favoritesOnlyProvider.notifier).state = true,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FilterChip extends ConsumerWidget {
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final design = ref.watch(designProvider);
-    return Material(
-      color: selected ? design.accent : design.surfaceColor,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            label,
-            style: design.subtitleStyle.copyWith(
-              color: selected ? Colors.white : design.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// class _ThemeMenu extends ConsumerWidget {
-//   const _ThemeMenu({required this.design});
-
-//   final DesignSystem design;
-
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     return PopupMenuButton<AppStyle>(
-//       tooltip: 'Appearance',
-//       icon: Icon(Icons.palette_outlined, color: design.textPrimary),
-//       onSelected: (style) => ref.read(themeProvider.notifier).state = style,
-//       itemBuilder: (context) => [
-//         PopupMenuItem(
-//           value: AppStyle.neumorphism,
-//           child: Text('Neumorphism'),
-//         ),
-//         PopupMenuItem(
-//           value: AppStyle.liquid,
-//           child: Text('Liquid Glass'),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-/// Sort selector matching the app's visual language: pill-shaped trigger,
-/// rounded frosted menu, accent checkmarks and a direction toggle.
-class SortMenu extends ConsumerWidget {
-  const SortMenu({super.key, required this.design});
-
-  final DesignSystem design;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final sort = ref.watch(sortProvider);
-    return PopupMenuButton<SortField?>(
-      tooltip: 'Sort songs',
-      color: design.menuColor,
-      elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      position: PopupMenuPosition.under,
-      onSelected: (field) {
-        if (field == null) {
-          ref.read(sortProvider.notifier).toggleDirection();
-        } else {
-          ref.read(sortProvider.notifier).setField(field);
-        }
-      },
-      itemBuilder: (context) => [
-        for (final field in SortField.values)
-          PopupMenuItem(
-            value: field,
-            child: Row(
-              children: [
-                Icon(
-                  field == sort.field
-                      ? Icons.check_rounded
-                      : Icons.radio_button_unchecked,
-                  size: 18,
-                  color:
-                      field == sort.field ? design.accent : design.textSecondary,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    field.label,
-                    style: design.titleStyle.copyWith(
-                      color: field == sort.field
-                          ? design.accent
-                          : design.textPrimary,
-                    ),
-                  ),
-                ),
-                if (field == sort.field)
-                  Icon(
-                    sort.ascending
-                        ? Icons.arrow_upward_rounded
-                        : Icons.arrow_downward_rounded,
-                    size: 16,
-                    color: design.accent,
-                  ),
-              ],
-            ),
-          ),
-        const PopupMenuDivider(),
-        const PopupMenuItem<SortField?>(
-          value: null,
-          child: _ReverseOrderRow(),
-        ),
-      ],
-      style: IconButton.styleFrom(backgroundColor: design.controlBackground),
-      icon: Icon(Icons.sort_rounded, color: design.textPrimary),
-    );
-  }
-}
-
-class _ReverseOrderRow extends ConsumerWidget {
-  const _ReverseOrderRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final design = ref.watch(designProvider);
-    return Row(
-      children: [
-        Icon(Icons.swap_vert_rounded, size: 18, color: design.textSecondary),
-        const SizedBox(width: 10),
-        Text('Reverse order', style: design.subtitleStyle),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Side navigation (desktop / tablet)
-// ---------------------------------------------------------------------------
-
-class _SideNav extends ConsumerWidget {
-  const _SideNav({required this.expanded});
-
-  final bool expanded;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final design = ref.watch(designProvider);
-    final favoritesOnly = ref.watch(favoritesOnlyProvider);
-    final favoritesCount = ref.watch(favoritesProvider).length;
-
-    Widget navItem({
-      required IconData icon,
-      required String label,
-      required bool selected,
-      String? badge,
-      required VoidCallback onTap,
-    }) {
-      final row = Row(
-        mainAxisAlignment:
-            expanded ? MainAxisAlignment.start : MainAxisAlignment.center,
-        children: [
-          Icon(icon,
-              size: 20,
-              color: selected ? Colors.white : design.textSecondary),
-          if (expanded) ...[
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: design.titleStyle.copyWith(
-                  color: selected ? Colors.white : design.textPrimary,
-                ),
-              ),
-            ),
-            if (badge != null)
-              Text(badge, style: design.subtitleStyle.copyWith(fontSize: 11)),
-          ],
-        ],
-      );
-
-      final item = Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        child: Material(
-          color: selected ? design.accent : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: onTap,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: expanded ? 14 : 10,
-                vertical: 12,
-              ),
-              child: row,
-            ),
-          ),
-        ),
-      );
-
-      return expanded
-          ? item
-          : Tooltip(message: label, child: item);
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: SizedBox(
-        width: expanded ? 240 : 76,
-        child: design.glass(
-          radius: 26,
-          color: design.hasBackdropImage ? null : design.surfaceColor,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          design.accent,
-                          design.accent.withAlpha(130),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child:
-                        const Icon(Icons.graphic_eq_rounded,
-                            color: Colors.white),
-                  ),
-                ),
-                if (expanded) ...[
-                  const SizedBox(height: 10),
-                  Center(
-                    child: Text('Nexar', style: design.headingStyle),
-                  ),
-                ],
-                const SizedBox(height: 22),
-                navItem(
-                  icon: Icons.library_music_rounded,
-                  label: 'All music',
-                  selected: !favoritesOnly,
-                  onTap: () => ref
-                      .read(favoritesOnlyProvider.notifier)
-                      .state = false,
-                ),
-                navItem(
-                  icon: Icons.favorite_rounded,
-                  label: 'Favorites',
-                  selected: favoritesOnly,
-                  badge: favoritesCount > 0 ? '$favoritesCount' : null,
-                  onTap: () => ref
-                      .read(favoritesOnlyProvider.notifier)
-                      .state = true,
-                ),
-                const Spacer(),
-                if (expanded)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('APPEARANCE', style: design.subtitleStyle),
-                        const SizedBox(height: 8),
-                        SegmentedButton<AppStyle>(
-                          segments: const [
-                            ButtonSegment(
-                              value: AppStyle.neumorphism,
-                              icon: Icon(Icons.layers_rounded, size: 16),
-                              label: Text('Soft'),
-                            ),
-                            
-                          ],
-                          selected: {ref.watch(themeProvider)},
-                          showSelectedIcon: false,
-                          onSelectionChanged: (selection) => ref
-                              .read(themeProvider.notifier)
-                              .state = selection.first,
-                          style: SegmentedButton.styleFrom(
-                            textStyle: design.subtitleStyle,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          musicDirectoryLabel(),
-                          style: design.subtitleStyle.copyWith(fontSize: 10.5),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  )
-                
-                
-                  // _ThemeMenu(design: design),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -605,15 +126,13 @@ class _LibraryView extends ConsumerWidget {
         return const _Message(
           icon: Icons.favorite_border_rounded,
           title: 'No favorites yet',
-          message:
-              'Tap the heart on any track to add it to your favorites.',
+          message: 'Tap the heart on any track to add it to your favorites.',
         );
       }
       return _Message(
         icon: Icons.library_music_rounded,
         title: 'Your library is empty',
-        message:
-            'Add audio files to ${musicDirectoryLabel()} and hit refresh.',
+        message: 'Add audio files to ${musicDirectoryLabel()} and hit refresh.',
       );
     }
 
@@ -664,7 +183,11 @@ class _Message extends ConsumerWidget {
           children: [
             Icon(icon, size: 52, color: design.textSecondary),
             const SizedBox(height: 14),
-            Text(title, textAlign: TextAlign.center, style: design.headingStyle),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: design.headingStyle,
+            ),
             const SizedBox(height: 6),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_bridge/liquid_glass_bridge.dart';
+// import 'package:liquid_glass_bridge/liquid_glass_bridge.dart';
 
 /// Pluggable design system: every screen renders through this interface so
 /// the whole app can switch between Neumorphism and Liquid Glass styles.
@@ -27,7 +27,7 @@ abstract class DesignSystem {
   TextStyle get subtitleStyle;
 
   /// Large frosted container used for sidebars, bars and sheets.
-  Widget glass({
+  Widget AppContainer({
     required Widget child,
     double radius = 24,
     EdgeInsetsGeometry padding = EdgeInsets.zero,
@@ -45,10 +45,10 @@ class NeumorphismDesign extends DesignSystem {
   /// Raw accent as an int, shared with the native notification styling.
   static const int accentValue = 0xFF7C3AED;
 
-  static const _bg = Color(0xFFE9E2F2);
+  static const _bg = Color.fromARGB(255, 232, 224, 243);
   static const _surface = Color(0xFFF4EFFA);
   static const _control = Color(0xFFEFE8F8);
-  static const _accent = Color(0xFF7C3AED);
+  static const _accent = Colors.pink;
   static const _textPrimary = Color(0xFF241C33);
   static const _textSecondary = Color(0xFF6F6786);
 
@@ -104,7 +104,7 @@ class NeumorphismDesign extends DesignSystem {
       );
 
   @override
-  Widget glass({
+  Widget AppContainer({
     required Widget child,
     double radius = 24,
     EdgeInsetsGeometry padding = EdgeInsets.zero,
@@ -143,19 +143,19 @@ class LiquidGlassDesign extends DesignSystem {
   String get label => 'Liquid Glass';
 
   @override
-  bool get hasBackdropImage => true;
+  bool get hasBackdropImage => false;
 
   @override
-  Color get scaffoldBackground => const Color(0xFF12101C);
+  Color get scaffoldBackground =>  Colors.black;
 
   @override
-  Color get surfaceColor => Colors.white.withAlpha(36);
+  Color get surfaceColor => Colors.grey.withAlpha(36);
 
   @override
   Color get controlBackground => Colors.white.withAlpha(46);
 
   @override
-  Color get accent => const Color(0xFFFF5C93);
+  Color get accent => Colors.deepOrange;
 
   @override
   Color get textPrimary => Colors.white;
@@ -167,7 +167,7 @@ class LiquidGlassDesign extends DesignSystem {
   Color get dividerColor => Colors.white.withAlpha(56);
 
   @override
-  Color get menuColor => const Color(0xFF201A2E);
+  Color get menuColor => const Color.fromARGB(255, 0, 0, 0);
 
   @override
   TextStyle get headingStyle => const TextStyle(
@@ -191,22 +191,26 @@ class LiquidGlassDesign extends DesignSystem {
       );
 
   @override
-  Widget glass({
+  Widget AppContainer({
     required Widget child,
     double radius = 24,
     EdgeInsetsGeometry padding = EdgeInsets.zero,
     Color? color,
   }) {
-    return LiquidGlassSurface(
-      borderRadius: BorderRadius.circular(radius),
-      padding: padding,
-      tintColor: color ?? Colors.white,
-      tintOpacity: 0.10,
-      blurSigma: 16,
-      highlightStrength: 0.22,
-      quality: LiquidGlassQuality.medium,
-      mode: LiquidGlassMode.auto,
-      child: child,
+    return BackdropFilter(
+      filterConfig: ImageFilterConfig.blur(
+        sigmaX: 12,
+        sigmaY: 12
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.grey
+          
+        ),
+        
+        child: child,
+      ),
     );
   }
 }

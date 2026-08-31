@@ -101,9 +101,12 @@ class SongTile extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Material(
-        color: isCurrent ? design.accent.withAlpha(28) : design.surfaceColor,
+        borderOnForeground: false,
+        color: isCurrent ? design.accent.withAlpha(28) : design.surfaceColor.withAlpha(20),
+        
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
+          
           borderRadius: BorderRadius.circular(18),
           onTap: () => _onTap(ref, song, isCurrent),
           // Diagnostics: reveals where this entry physically lives, so

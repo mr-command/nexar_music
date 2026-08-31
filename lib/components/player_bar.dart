@@ -1,6 +1,9 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:nexar_app/services/models.dart';
 
 import '../screens/now_playing_sheet.dart';
 import '../services/providers.dart';
@@ -13,6 +16,7 @@ class TransportControls extends ConsumerWidget {
     this.size = 24,
     this.playSize = 56,
     this.showExtras = true,
+    required this.song,
   });
 
   final double size;
@@ -20,18 +24,31 @@ class TransportControls extends ConsumerWidget {
 
   /// Whether shuffle/repeat buttons are included.
   final bool showExtras;
+  final Song song;
+
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final design = ref.watch(designProvider);
     final audio = ref.read(audioServiceProvider);
     final isPlaying = ref.watch(isPlayingProvider).value ?? false;
+    // final song = queue[index];
+    final currentPath = ref.watch(
+      currentSongProvider.select((song) => song?.path),
+    );
+    final isCurrent = song.path == currentPath;
+    final isFavorite = ref.watch(
+      favoritesProvider.select((favorites) => favorites.contains(song.path)),
+    );
 
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         if (showExtras)
+          SizedBox(),
+        if (showExtras)
           _ToggleIcon(
+            song: song,
             provider: shuffleStateProvider,
             onToggle: () {
               final enabled =
@@ -75,43 +92,74 @@ class TransportControls extends ConsumerWidget {
           icon: Icon(Icons.skip_next_rounded, size: size + 6),
           color: design.textPrimary,
         ),
+
         if (showExtras)
           _ToggleIcon(
+            song: song,
             provider: loopStateProvider,
+
             onToggle: () {
-              final enabled = !(ref.read(loopStateProvider).value ?? false);
-              audio.setLoop(enabled);
+              final mode = ref.read(loopStateProvider).value.toString();
+              
+              audio.setLoop(mode);
             },
             icon: Icons.repeat_rounded,
             size: size,
+          ),
+
+        if(showExtras)
+          Stack(
+            children: [
+              Positioned(
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  fixedSize: Size(40, 40)
+                ),
+                  tooltip: 'Favorite',
+                  onPressed: () =>
+                      ref.read(favoritesProvider.notifier).toggle(song.path),
+                  icon: Icon(
+                    isFavorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    color: isFavorite ? design.accent : design.textSecondary,
+                    
+                    size: 25,
+                  ),
+                ),
+            ),
+            ], 
           ),
       ],
     );
   }
 }
 
-class _ToggleIcon extends ConsumerWidget {
+class _ToggleIcon<T extends ProviderListenable> extends ConsumerWidget {
   const _ToggleIcon({
     required this.provider,
     required this.onToggle,
     required this.icon,
     required this.size,
+    required this.song,
   });
 
-  final StreamProvider<bool> provider;
+  final T provider;
   final VoidCallback onToggle;
   final IconData icon;
   final double size;
+  final Song song;
+
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final design = ref.watch(designProvider);
-    final active = ref.watch(provider).value ?? false;
+    final active = ref.watch(provider);
     return IconButton(
-      tooltip: active ? 'On' : 'Off',
+      tooltip: active == PlaylistMode.none ? 'off' : active == PlaylistMode.single? 'Repeat' : 'loop the list',
       onPressed: onToggle,
       icon: Icon(icon, size: size),
-      color: active ? design.accent : design.textSecondary,
+      color: active == PlaylistMode.none ? design.textSecondary : design.accent,
     );
   }
 }
@@ -175,11 +223,14 @@ class MiniPlayerBar extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-      child: design.glass(
-        radius: 26,
-        color: design.hasBackdropImage
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: design.hasBackdropImage
             ? null
             : design.surfaceColor,
+        ),
+        
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -215,10 +266,11 @@ class MiniPlayerBar extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const TransportControls(
+                    TransportControls(
                       size: 20,
                       playSize: 42,
                       showExtras: false,
+                      song: song,
                     ),
                     IconButton(
                       tooltip: 'Open player',

@@ -1,98 +1,39 @@
-import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'models.dart';
-
-/// On-disk representation of one parsed song.
+/// The app's single library cache.
 ///
-/// Identity = file modification time + size, so edited/replaced files are
-/// automatically re-parsed on the next launch instead of served stale.
-class CachedSong {
-  const CachedSong({
-    required this.modifiedMs,
-    required this.size,
-    required this.title,
-    required this.artist,
-    this.album,
-    this.durationMs,
-  });
+/// Device storage is walked once; the resulting audio file paths are then
+/// persisted in SharedPreferences. On every launch those paths are read back
+/// and metadata is fetched from the files directly — no repeated directory
+/// scan — until the cache is cleared or the user forces a refresh.
+abstract final class MusicCache {
+  static const String _key = 'cached_music_paths';
 
-  factory CachedSong.fromSong(Song song, {required int size}) =>
-      CachedSong(
-        modifiedMs: song.dateModified?.millisecondsSinceEpoch ?? 0,
-        size: size,
-        title: song.title,
-        artist: song.artist,
-        album: song.album,
-        durationMs: song.duration?.inMilliseconds,
-      );
-
-  factory CachedSong.fromJson(Map<String, dynamic> json) => CachedSong(
-        modifiedMs: (json['m'] as num?)?.toInt() ?? 0,
-        size: (json['s'] as num?)?.toInt() ?? 0,
-        title: json['t'] as String,
-        artist: json['a'] as String? ?? '',
-        album: json['al'] as String?,
-        durationMs: (json['d'] as num?)?.toInt(),
-      );
-
-  final int modifiedMs;
-  final int size;
-  final String title;
-  final String artist;
-  final String? album;
-  final int? durationMs;
-
-  Map<String, dynamic> toJson() => {
-        'm': modifiedMs,
-        's': size,
-        't': title,
-        'a': artist,
-        if (album != null) 'al': album,
-        if (durationMs != null) 'd': durationMs,
-      };
-
-  Song toSong(String path) => Song(
-        path: path,
-        title: title,
-        artist: artist,
-        album: album,
-        duration:
-            durationMs == null ? null : Duration(milliseconds: durationMs!),
-        dateModified:
-            modifiedMs <= 0 ? null : DateTime.fromMillisecondsSinceEpoch(
-                modifiedMs),
-      );
-}
-
-abstract final class LibraryCache {
-  static const String _key = 'nexar_library_cache_v1';
-
-  /// Compact JSON: `{"<path>": {...}}` — a whole large library fits in a few
-  /// hundred KB, which SharedPreferences handles comfortably.
-  static Future<Map<String, CachedSong>> load() async {
+  /// Cached audio paths, or an empty list when nothing was scanned yet.
+  static Future<List<String>> loadPaths() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_key);
-      if (raw == null || raw.isEmpty) return <String, CachedSong>{};
-      final decoded =
-          (jsonDecode(raw) as Map<String, dynamic>).cast<String, Object?>();
-      return decoded.map((path, entry) => MapEntry(path,
-          CachedSong.fromJson((entry as Map).cast<String, dynamic>())));
+      return prefs.getStringList(_key) ?? const <String>[];
     } catch (_) {
-      return <String, CachedSong>{};
+      return const <String>[];
     }
   }
 
-  static Future<void> save(Map<String, CachedSong> cache) async {
+  /// Persists [paths] after a scan so future launches can skip it.
+  static Future<void> savePaths(List<String> paths) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_key, jsonEncode({
-        for (final entry in cache.entries) entry.key: entry.value.toJson(),
-      }));
+      await prefs.setStringList(_key, paths);
     } catch (_) {
-      // Cache persistence is best-effort; losing it only costs speed.
+      // Persistence is best-effort; losing it only costs one extra scan.
     }
+  }
+
+  /// Drops the cache so the next launch performs a full scan again.
+  static Future<void> clear() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_key);
+    } catch (_) {}
   }
 }

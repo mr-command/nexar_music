@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:isolate';
 
 import 'models.dart';
 
@@ -14,21 +13,6 @@ const audioExtensions = <String>[
   '.opus',
   '.wma',
 ];
-
-// ---------------------------------------------------------------------------
-// Multi-platform scanner
-//
-// Every platform gets its own set of scan roots:
-//   Android : primary shared storage (/storage/emulated/0) plus every mounted
-//             volume (SD cards, USB OTG) exposed under /storage/<UUID>.
-//   Linux   : XDG music directory when defined, otherwise ~/Music, ~/Downloads
-//             and the whole home folder as a safety net.
-//   Windows : %USERPROFILE%\Music and %USERPROFILE%\Downloads plus the Music
-//             folder of every other fixed drive that exists (D:\Music ...).
-//
-// Roots are scanned in parallel; inside each root directories are walked
-// breadth-first so noisy system folders can be pruned early.
-// ---------------------------------------------------------------------------
 
 /// Directory names never worth descending into while hunting for music.
 const _prunedDirectories = <String>{
@@ -49,7 +33,7 @@ const _prunedDirectories = <String>{
 };
 
 /// True when running on a mobile platform.
-bool get isMobilePlatform => Platform.isAndroid || Platform.isIOS;
+bool get isMobilePlatform => Platform.isAndroid;
 
 /// Returns every root directory this platform should be scanned for music.
 List<Directory> musicDirectories() {
@@ -138,9 +122,9 @@ Future<List<String>> scanAudioFiles() async {
   final roots = musicDirectories();
   if (roots.isEmpty) return const <String>[];
 
-  final results = await Future.wait(
-    [for (final root in roots) _scanRoot(root)],
-  );
+  final results = await Future.wait([
+    for (final root in roots) _scanRoot(root),
+  ]);
 
   // Overlapping mounts (e.g. an SD-card path also visible under the primary
   // storage) would otherwise push every shared song twice into the library.
@@ -151,9 +135,7 @@ Future<List<String>> scanAudioFiles() async {
         if (seen.add(path)) path,
   ];
 
-  paths.sort(
-    (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
-  );
+  paths.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
   return paths;
 }
@@ -198,9 +180,8 @@ Future<List<String>> _scanRoot(Directory root) async {
 // ---------------------------------------------------------------------------
 
 /// Converts Windows separators to `/` for uniform comparisons.
-String _normalize(String path) => Platform.isWindows
-    ? path.replaceAll('\\', '/')
-    : path;
+String _normalize(String path) =>
+    Platform.isWindows ? path.replaceAll('\\', '/') : path;
 
 /// File name portion of [path], regardless of separator style.
 String pathBaseName(String path) {
@@ -222,8 +203,9 @@ String extensionOf(String path) {
 String fallbackTrackName(String path) {
   var base = pathBaseName(path);
   final ext = extensionOf(base);
-  var name =
-      ext.isNotEmpty ? base.substring(0, base.length - ext.length) : base;
+  var name = ext.isNotEmpty
+      ? base.substring(0, base.length - ext.length)
+      : base;
   name = name.replaceAll('_', ' ').replaceAll('-', ' ');
   name = name.replaceFirst(RegExp(r'^\d{1,3}\s*[\s.]\s*'), '');
   name = RegExp(r'\s+').allMatches(name).isEmpty
@@ -244,35 +226,6 @@ String formatDuration(Duration? duration) {
 }
 
 // ---------------------------------------------------------------------------
-// Fast file stamping (cache identity + "Date added" sorting)
-// ---------------------------------------------------------------------------
-
-/// Modification time and size of one file. Both values together act as the
-/// fingerprint deciding whether a cached metadata entry is still valid.
-typedef FileStamp = ({int modifiedMs, int size});
-
-/// Stamps every path in a background isolate — thousands of stat() calls at
-/// once keeps the UI thread free during warm starts.
-Future<Map<String, FileStamp>> stampFiles(List<String> paths) {
-  if (paths.isEmpty) return Future.value(const <String, FileStamp>{});
-  return Isolate.run(() {
-    final stamps = <String, FileStamp>{};
-    for (final path in paths) {
-      try {
-        final stat = File(path).statSync();
-        stamps[path] = (
-          modifiedMs: stat.modified.millisecondsSinceEpoch,
-          size: stat.size,
-        );
-      } catch (_) {
-        // Vanished between scan and stamp — excluded from this session.
-      }
-    }
-    return stamps;
-  });
-}
-
-// ---------------------------------------------------------------------------
 // Sorting
 // ---------------------------------------------------------------------------
 
@@ -281,12 +234,12 @@ enum SortField { title, artist, album, duration, dateAdded }
 
 extension SortFieldLabel on SortField {
   String get label => switch (this) {
-        SortField.title => 'Title',
-        SortField.artist => 'Artist',
-        SortField.album => 'Album',
-        SortField.duration => 'Duration',
-        SortField.dateAdded => 'Date added',
-      };
+    SortField.title => 'Title',
+    SortField.artist => 'Artist',
+    SortField.album => 'Album',
+    SortField.duration => 'Duration',
+    SortField.dateAdded => 'Date added',
+  };
 }
 
 /// Active sort configuration.
@@ -298,16 +251,16 @@ class SortSpec {
 
   int compare(Song a, Song b) {
     var result = switch (field) {
-      SortField.title =>
-        _fold(a.title).compareTo(_fold(b.title)),
-      SortField.artist =>
-        _fold(a.artist).compareTo(_fold(b.artist)),
-      SortField.album =>
-        _fold(a.album ?? '').compareTo(_fold(b.album ?? '')),
-      SortField.duration =>
-        (a.duration ?? Duration.zero).compareTo(b.duration ?? Duration.zero),
-      SortField.dateAdded => (a.dateModified?.millisecondsSinceEpoch ?? 0)
-            .compareTo(b.dateModified?.millisecondsSinceEpoch ?? 0),
+      SortField.title => _fold(a.title).compareTo(_fold(b.title)),
+      SortField.artist => _fold(a.artist).compareTo(_fold(b.artist)),
+      SortField.album => _fold(a.album ?? '').compareTo(_fold(b.album ?? '')),
+      SortField.duration => (a.duration ?? Duration.zero).compareTo(
+        b.duration ?? Duration.zero,
+      ),
+      SortField.dateAdded =>
+        (a.dateModified?.millisecondsSinceEpoch ?? 0).compareTo(
+          b.dateModified?.millisecondsSinceEpoch ?? 0,
+        ),
     };
     if (result == 0) result = _fold(a.path).compareTo(_fold(b.path));
     return ascending ? result : -result;
@@ -315,4 +268,3 @@ class SortSpec {
 
   static String _fold(String value) => value.toLowerCase();
 }
-

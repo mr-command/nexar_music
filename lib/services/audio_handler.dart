@@ -7,12 +7,6 @@ import 'artwork_repository.dart';
 import 'models.dart';
 
 /// Bridges the media_kit [Player] to Android's MediaSession.
-///
-/// Running inside a mediaPlayback foreground service keeps the process from
-/// being throttled while the screen is off — which was the cause of the
-/// crackling/distorted audio after locking the phone — and automatically
-/// produces the system media notification with play/pause / next / previous
-/// controls, colored to match the app accent and album artwork.
 class NexarAudioHandler extends BaseAudioHandler {
   NexarAudioHandler(this._player) {
     _player.stream.playing.listen((_) => _sync());
@@ -22,9 +16,12 @@ class NexarAudioHandler extends BaseAudioHandler {
 
   final Player _player;
 
-  /// Snapshot of the queue passed to the last playQueue call, used to map
-  /// engine paths back to full song metadata for the notification.
+  /// Snapshot of the queue passed to the last playQueue call
   List<Song> _songs = const <Song>[];
+
+  // ========== Shuffle & Loop state ==========
+  AudioServiceRepeatMode _repeatMode = AudioServiceRepeatMode.none;
+  AudioServiceShuffleMode _shuffleMode = AudioServiceShuffleMode.none;
 
   static Future<NexarAudioHandler> init(Player player) {
     return AudioService.init(
@@ -51,6 +48,7 @@ class NexarAudioHandler extends BaseAudioHandler {
   Future<void> loadQueue(List<Song> queue, {int startIndex = 0}) async {
     if (queue.isEmpty) return;
     _songs = List.unmodifiable(queue);
+
     await _player.open(
       Playlist(
         [for (final song in queue) Media(song.path)],
@@ -94,24 +92,19 @@ class NexarAudioHandler extends BaseAudioHandler {
     final item = _buildItem(song,
         artUri: ArtworkRepository.cachedArtworkUri(song.path));
     mediaItem.add(item);
-    // Cover art might not be materialized yet; attach it as soon as ready so
-    // the notification updates from generic icon → real album art.
     unawaited(_attachArtwork(item, song.path));
   }
 
   Future<void> _attachArtwork(MediaItem base, String path) async {
     try {
-      final uri =
-          await ArtworkRepository.artworkFile(path).timeout(const Duration(
-        seconds: 4,
-      ));
+      final uri = await ArtworkRepository.artworkFile(path).timeout(
+        const Duration(seconds: 4),
+      );
       final stillCurrent = identical(mediaItem.valueOrNull ?? base, base);
       if (uri != null && stillCurrent) {
         mediaItem.add(base.copyWith(artUri: uri));
       }
-    } catch (_) {
-      // Notification simply stays without art — nothing else to do.
-    }
+    } catch (_) {}
   }
 
   void _refreshDuration() {
@@ -142,7 +135,11 @@ class NexarAudioHandler extends BaseAudioHandler {
               MediaControl.play,
               MediaControl.skipToNext,
             ],
-      systemActions: const {MediaAction.seek},
+      systemActions: const {
+        MediaAction.seek,
+        MediaAction.setRepeatMode,
+        MediaAction.setShuffleMode,
+      },
       androidCompactActionIndices: const [0, 1, 2],
       processingState: AudioProcessingState.ready,
       playing: playing,
@@ -150,6 +147,9 @@ class NexarAudioHandler extends BaseAudioHandler {
       bufferedPosition: _player.state.buffer,
       speed: _player.state.rate,
       queueIndex: queueIndex ?? _player.state.playlist.index,
+      // ========== Important: include current modes ==========
+      repeatMode: _repeatMode,
+      shuffleMode: _shuffleMode,
     );
   }
 
@@ -184,6 +184,46 @@ class NexarAudioHandler extends BaseAudioHandler {
   Future<void> stop() async {
     await _player.pause();
     await super.stop();
+  }
+
+  // =========================================================================
+  // ========== Shuffle & Loop (Repeat) ==========
+  // =========================================================================
+
+  @override
+  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
+    _repeatMode = repeatMode;
+
+    // Map to media_kit PlaylistMode
+    switch (repeatMode) {
+      case AudioServiceRepeatMode.none:
+        await _player.setPlaylistMode(PlaylistMode.none);
+        break;
+      case AudioServiceRepeatMode.one:
+        await _player.setPlaylistMode(PlaylistMode.single);
+        break;
+      case AudioServiceRepeatMode.all:
+      case AudioServiceRepeatMode.group:
+        await _player.setPlaylistMode(PlaylistMode.loop);
+        break;
+    }
+
+    // Update notification / lock screen
+    playbackState.add(_state());
+  }
+
+  @override
+  Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
+    _shuffleMode = shuffleMode;
+
+    final enableShuffle = shuffleMode == AudioServiceShuffleMode.all ||
+        shuffleMode == AudioServiceShuffleMode.group;
+
+    // media_kit has built-in shuffle
+    await _player.setShuffle(enableShuffle);
+
+    // Update notification / lock screen
+    playbackState.add(_state());
   }
 }
 

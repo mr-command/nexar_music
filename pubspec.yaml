@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  liquid_glass_bridge: ^0.2.1      # Liquid Glass (iOS 26 style)
+  # liquid_glass_bridge: ^0.2.1      # Liquid Glass (iOS 26 style)
   media_kit: ^1.2.6
   media_kit_libs_audio: ^1.0.7
   path: ^1.9.0

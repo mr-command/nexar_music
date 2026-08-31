@@ -21,6 +21,7 @@ class FullPlayerView extends ConsumerWidget {
 
     if (song == null) {
       return Padding(
+        
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -60,7 +61,11 @@ class FullPlayerView extends ConsumerWidget {
       child: AlbumArt(song: song, size: artSize, radius: 28),
     );
 
-    return SingleChildScrollView(
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: design.surfaceColor
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -86,6 +91,7 @@ class FullPlayerView extends ConsumerWidget {
           const SeekBar(withLabels: true),
           const SizedBox(height: 6),
           TransportControls(
+            song: song,
             size: 28,
             playSize: 64,
           ),
