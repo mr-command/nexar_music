@@ -1,7 +1,6 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:nexar_app/services/models.dart';
 
@@ -32,11 +31,8 @@ class TransportControls extends ConsumerWidget {
     final design = ref.watch(designProvider);
     final audio = ref.read(audioServiceProvider);
     final isPlaying = ref.watch(isPlayingProvider).value ?? false;
-    // final song = queue[index];
-    final currentPath = ref.watch(
-      currentSongProvider.select((song) => song?.path),
-    );
-    final isCurrent = song.path == currentPath;
+    final loopMode =
+        ref.watch(loopStateProvider).value ?? PlaylistMode.none;
     final isFavorite = ref.watch(
       favoritesProvider.select((favorites) => favorites.contains(song.path)),
     );
@@ -48,8 +44,7 @@ class TransportControls extends ConsumerWidget {
           SizedBox(),
         if (showExtras)
           _ToggleIcon(
-            song: song,
-            provider: shuffleStateProvider,
+            active: ref.watch(shuffleStateProvider).value ?? false,
             onToggle: () {
               final enabled =
                   !(ref.read(shuffleStateProvider).value ?? false);
@@ -57,6 +52,8 @@ class TransportControls extends ConsumerWidget {
             },
             icon: Icons.shuffle_rounded,
             size: size,
+            activeTooltip: 'Shuffle on',
+            inactiveTooltip: 'Shuffle off',
           ),
         IconButton(
           tooltip: 'Previous',
@@ -95,16 +92,23 @@ class TransportControls extends ConsumerWidget {
 
         if (showExtras)
           _ToggleIcon(
-            song: song,
-            provider: loopStateProvider,
-
+            active: loopMode != PlaylistMode.none,
             onToggle: () {
-              final mode = ref.read(loopStateProvider).value.toString();
-              
-              audio.setLoop(mode);
+              // Cycle: off -> repeat all -> repeat one -> off.
+              final next = switch (loopMode) {
+                PlaylistMode.none => PlaylistMode.loop,
+                PlaylistMode.loop => PlaylistMode.single,
+                PlaylistMode.single => PlaylistMode.none,
+              };
+              audio.setLoop(next);
             },
-            icon: Icons.repeat_rounded,
+            icon: loopMode == PlaylistMode.single
+                ? Icons.repeat_one_rounded
+                : Icons.repeat_rounded,
             size: size,
+            activeTooltip:
+                loopMode == PlaylistMode.single ? 'Repeat one' : 'Repeat all',
+            inactiveTooltip: 'Repeat off',
           ),
 
         if(showExtras)
@@ -135,31 +139,31 @@ class TransportControls extends ConsumerWidget {
   }
 }
 
-class _ToggleIcon<T extends ProviderListenable> extends ConsumerWidget {
+class _ToggleIcon extends ConsumerWidget {
   const _ToggleIcon({
-    required this.provider,
+    required this.active,
     required this.onToggle,
     required this.icon,
     required this.size,
-    required this.song,
+    required this.activeTooltip,
+    required this.inactiveTooltip,
   });
 
-  final T provider;
+  final bool active;
   final VoidCallback onToggle;
   final IconData icon;
   final double size;
-  final Song song;
-
+  final String activeTooltip;
+  final String inactiveTooltip;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final design = ref.watch(designProvider);
-    final active = ref.watch(provider);
     return IconButton(
-      tooltip: active == PlaylistMode.none ? 'off' : active == PlaylistMode.single? 'Repeat' : 'loop the list',
+      tooltip: active ? activeTooltip : inactiveTooltip,
       onPressed: onToggle,
       icon: Icon(icon, size: size),
-      color: active == PlaylistMode.none ? design.textSecondary : design.accent,
+      color: active ? design.accent : design.textSecondary,
     );
   }
 }

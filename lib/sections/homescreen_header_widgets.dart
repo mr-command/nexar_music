@@ -44,11 +44,13 @@ class ThemeMenu extends ConsumerWidget {
     return PopupMenuButton<AppStyle>(
       
       tooltip: 'Appearance',
+      surfaceTintColor: design.surfaceColor,
       icon: Icon(Icons.palette_outlined, color: design.textPrimary),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       position: PopupMenuPosition.under,
       color: design.menuColor,
       elevation: 6,
+      style: IconButton.styleFrom(backgroundColor: design.controlBackground),
       onSelected: (style) {
         print(style);
         ref.read(themeProvider.notifier).state = style;

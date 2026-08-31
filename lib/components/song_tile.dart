@@ -102,7 +102,7 @@ class SongTile extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Material(
         borderOnForeground: false,
-        color: isCurrent ? design.accent.withAlpha(28) : design.surfaceColor.withAlpha(20),
+        color: isCurrent ? design.accent.withAlpha(28) : design.surfaceColor,
         
         borderRadius: BorderRadius.circular(18),
         child: InkWell(

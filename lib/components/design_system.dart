@@ -62,7 +62,7 @@ class NeumorphismDesign extends DesignSystem {
   Color get scaffoldBackground => _bg;
 
   @override
-  Color get surfaceColor => _surface;
+  Color get surfaceColor => const Color.fromARGB(255, 255, 255, 255);
 
   @override
   Color get controlBackground => _control;

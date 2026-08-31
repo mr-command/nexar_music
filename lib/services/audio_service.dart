@@ -42,6 +42,5 @@ class AudioService {
 
   Future<void> setShuffle(bool enabled) => _player.setShuffle(enabled);
 
-  Future<void> setLoop(String mode) =>
-      _player.setPlaylistMode(mode == 'off' ? PlaylistMode.none : mode == 'Repeat'? PlaylistMode.single : PlaylistMode.loop);
+  Future<void> setLoop(PlaylistMode mode) => _player.setPlaylistMode(mode);
 }

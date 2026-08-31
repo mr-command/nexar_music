@@ -102,6 +102,7 @@ class _HeaderState extends ConsumerState<Header> {
               ),
               const SizedBox(width: 8),
               SortMenu(design: design),
+              const SizedBox(width: 8,),
               ThemeMenu(design: design,appStyle: appStyle,)
             ],
           ),
@@ -135,7 +136,7 @@ class _HeaderState extends ConsumerState<Header> {
               ),
               const SizedBox(width: 10),
               IconButton.filledTonal(
-                tooltip: 'Shuffle all',
+                tooltip: 'Random Song',
                 onPressed: songCount == 0
                     ? null
                     : () => ref
