@@ -43,6 +43,7 @@ dependencies:
   permission_handler: ^13.0.1
   audio_service: ^0.18.18          # background playback + media notification
   path_provider: ^2.1.5            # cache dir for notification artwork files
+  google_nav_bar: ^5.0.7
 
 dev_dependencies:
   flutter_lints: ^6.0.0

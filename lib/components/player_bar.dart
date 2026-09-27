@@ -2,6 +2,7 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:nexar_app/components/design_system.dart';
 import 'package:nexar_app/services/models.dart';
 
 import '../screens/now_playing_sheet.dart';
@@ -208,12 +209,12 @@ class SeekBar extends ConsumerWidget {
 class MiniPlayerBar extends ConsumerWidget {
   const MiniPlayerBar({super.key});
 
-  void _openFullPlayer(BuildContext context) {
+  void _openFullPlayer(BuildContext context,DesignSystem design) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: design.menuColor,
       builder: (_) => const NowPlayingSheet(),
     );
   }
@@ -230,9 +231,7 @@ class MiniPlayerBar extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: design.hasBackdropImage
-            ? null
-            : design.surfaceColor,
+          color: design.scaffoldBackground
         ),
         
         child: Column(
@@ -241,7 +240,7 @@ class MiniPlayerBar extends ConsumerWidget {
             const SeekBar(),
             InkWell(
               borderRadius: BorderRadius.circular(22),
-              onTap: () => _openFullPlayer(context),
+              onTap: () => _openFullPlayer(context,design),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(14, 2, 10, 12),
                 child: Row(
@@ -250,7 +249,7 @@ class MiniPlayerBar extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
@@ -276,14 +275,14 @@ class MiniPlayerBar extends ConsumerWidget {
                       showExtras: false,
                       song: song,
                     ),
-                    IconButton(
-                      tooltip: 'Open player',
-                      onPressed: () => _openFullPlayer(context),
-                      icon: Icon(
-                        Icons.keyboard_arrow_up_rounded,
-                        color: design.textSecondary,
-                      ),
-                    ),
+                    // IconButton(
+                    //   tooltip: 'Open player',
+                    //   onPressed: () => _openFullPlayer(context,design),
+                    //   icon: Icon(
+                    //     Icons.keyboard_arrow_up_rounded,
+                    //     color: design.textSecondary,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

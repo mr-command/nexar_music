@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:nexar_app/features/library/viewmodel/lib_providers.dart';
 import 'package:nexar_app/sections/sidenav.dart';
 
@@ -89,9 +90,23 @@ class HomeScreen extends ConsumerWidget {
               },
             ),
           ),
+          Positioned(
+            // top: 400,
+            bottom: 2,
+            left: 10,
+            right: 10,
+            child: MiniPlayerBar())
         ],
       ),
-      bottomNavigationBar: const MiniPlayerBar(),
+      bottomNavigationBar: GNav(
+        activeColor: design.accent,
+        color: design.surfaceColor,
+        tabs: [
+        GButton(icon: Icons.music_note,text: "Songs",),
+        GButton(icon: Icons.album,text: "Albums"),
+        GButton(icon: Icons.search,text: "Search"),
+        GButton(icon: Icons.playlist_play,text: "PlayLists"),
+      ],),
     );
   }
 }
