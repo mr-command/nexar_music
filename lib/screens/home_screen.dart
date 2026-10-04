@@ -3,8 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:nexar_app/features/library/viewmodel/lib_providers.dart';
+import 'package:nexar_app/features/library/views/pages/home_screen.dart';
+import 'package:nexar_app/features/library/views/pages/playlist_screen.dart';
+import 'package:nexar_app/features/search/views/search_screem.dart';
+import 'package:nexar_app/features/settings/views/settings_screen.dart';
 import 'package:nexar_app/sections/sidenav.dart';
-
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../sections/homescreen_header.dart';
 import '../components/full_player_view.dart';
 import '../components/player_bar.dart';
@@ -13,208 +17,211 @@ import '../services/models.dart';
 import '../services/providers.dart';
 import '../services/utils.dart';
 
+
+class NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  const NavItem({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final inactiveColor =
+        Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Center(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 6,
+          ),
+          decoration: BoxDecoration(
+            color: selected
+                ? color.withAlpha(25)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedScale(
+                scale: selected ? 1.12 : 1.0,
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutBack,
+                child: Icon(
+                  icon,
+                  size: 21,
+                  color: selected ? color : inactiveColor,
+                ),
+              ),
+
+              const SizedBox(height: 3),
+
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                style: TextStyle(
+                  fontSize: selected ? 10 : 9,
+                  fontWeight: selected
+                      ? FontWeight.w600
+                      : FontWeight.w400,
+                  color: selected ? color : inactiveColor,
+                ),
+                child: Text(label),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final design = ref.watch(designProvider);
-
+    int index = ref.watch(navbarindexProvider);
     return Scaffold(
       backgroundColor: design.scaffoldBackground,
       body: Stack(
         children: [
-          if (design.hasBackdropImage)
-            Positioned.fill(
-              child: Image.asset(
-                'assets/images/liquid.jpg',
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) =>
-                    ColoredBox(color: design.scaffoldBackground),
+
+
+        Positioned.fill(
+          child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (child, animation) {
+            final offsetAnimation = Tween<Offset>(
+              begin: const Offset(0.04, 0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
               ),
-            ),
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final width = constraints.maxWidth;
-                final showSideNav = width >= 760;
-                final showPanel = width >= 1180;
-                final visibleSongs = ref.watch(visibleSongsProvider);
+            );
 
-                final content = Column(
-                  children: [
-                    Header(
-                      compact: !showSideNav,
-                      songCount: visibleSongs.length,
-                    ),
-                    Expanded(child: _LibraryView(songs: visibleSongs)),
-                  ],
-                );
-
-                return CallbackShortcuts(
-                  bindings: {
-                    const SingleActivator(LogicalKeyboardKey.space): () =>
-                        ref.read(audioServiceProvider).togglePlayPause(),
-                  },
-                  child: Focus(
-                    autofocus: true,
-                    child: showSideNav
-                        ? Row(
-                            children: [
-                              SideNav(expanded: showPanel),
-                              Expanded(child: content),
-                              if (showPanel)
-                                SizedBox(
-                                  width: 360,
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      0,
-                                      12,
-                                      12,
-                                      12,
-                                    ),
-                                    child: Container(
-                                      // radius: 28,
-                                      color: design.hasBackdropImage
-                                          ? null
-                                          : design.surfaceColor,
-                                      child: const FullPlayerView(),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          )
-                        : content,
-                  ),
-                );
-              },
-            ),
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              ),
+            );
+          },
+          child: KeyedSubtree(
+            key: ValueKey(index),
+            child: switch (index) {
+              0 => const SongScreen(),
+              1 => const SearchScreen(),
+              2 => const PlaylistScreen(),
+              3 => const SettingsScreen(),
+              _ => const SongScreen(),
+            },
           ),
+        ),
+      ),
+
+
           Positioned(
             // top: 400,
-            bottom: 2,
+            bottom: 70,
             left: 10,
             right: 10,
-            child: MiniPlayerBar())
+            child: MiniPlayerBar()),
+          
+
+          Positioned(
+          left: 20,
+          right: 20,
+          bottom: 12,
+          child: SafeArea(
+            top: false,
+            child: Container(
+            height: 64,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            decoration: BoxDecoration(
+              color: design.menuColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: NavItem(
+                    icon: LucideIcons.house,
+                    label: 'Home',
+                    selected: index == 0,
+                    color: design.accent,
+                    onTap: () {
+                      ref.read(navbarindexProvider.notifier).state = 0;
+                    },
+                  ),
+                ),
+
+                Expanded(
+                  child: NavItem(
+                    icon: LucideIcons.search,
+                    label: 'Search',
+                    selected: index == 1,
+                    color: design.accent,
+                    onTap: () {
+                      ref.read(navbarindexProvider.notifier).state = 1;
+                    },
+                  ),
+                ),
+
+                Expanded(
+                  child: NavItem(
+                    icon: LucideIcons.album,
+                    label: 'Albums',
+                    selected: index == 2,
+                    color: design.accent,
+                    onTap: () {
+                      ref.read(navbarindexProvider.notifier).state = 2;
+                    },
+                  ),
+                ),
+
+                Expanded(
+                  child: NavItem(
+                    icon: LucideIcons.playCircle,
+                    label: 'Playlists',
+                    selected: index == 3,
+                    color: design.accent,
+                    onTap: () {
+                      ref.read(navbarindexProvider.notifier).state = 3;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          )
+          ),
+        ),
         ],
       ),
-      bottomNavigationBar: GNav(
-        activeColor: design.accent,
-        color: design.surfaceColor,
-        tabs: [
-        GButton(icon: Icons.music_note,text: "Songs",),
-        GButton(icon: Icons.album,text: "Albums"),
-        GButton(icon: Icons.search,text: "Search"),
-        GButton(icon: Icons.playlist_play,text: "PlayLists"),
-      ],),
+
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Library list with all states (loading / error / empty / data)
-// ---------------------------------------------------------------------------
 
-class _LibraryView extends ConsumerWidget {
-  const _LibraryView({required this.songs});
-
-  final List<Song> songs;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final design = ref.watch(designProvider);
-    final state = ref.watch(libraryControllerProvider);
-    final favoritesOnly = ref.watch(favoritesOnlyProvider);
-
-    if (state.error != null && songs.isEmpty && !state.parsing) {
-      return _Message(
-        icon: Icons.error_outline_rounded,
-        title: 'Could not read your music folder',
-        message: '${state.error}',
-      );
-    }
-    if (state.scanning && songs.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (songs.isEmpty) {
-      if (favoritesOnly) {
-        return const _Message(
-          icon: Icons.favorite_border_rounded,
-          title: 'No favorites yet',
-          message: 'Tap the heart on any track to add it to your favorites.',
-        );
-      }
-      return _Message(
-        icon: Icons.library_music_rounded,
-        title: 'Your library is empty',
-        message: 'Add audio files to ${musicDirectoryLabel()} and hit refresh.',
-      );
-    }
-
-    return Column(
-      children: [
-        // Slim accent bar while background tags are still streaming in —
-        // the list itself is already usable (placeholders fill instantly).
-        if (state.parsing)
-          SizedBox(
-            height: 2,
-            child: LinearProgressIndicator(
-              color: design.accent,
-              backgroundColor: design.dividerColor,
-            ),
-          ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.only(top: 4, bottom: 110),
-            itemCount: songs.length,
-            itemBuilder: (context, index) =>
-                SongTile(queue: songs, index: index),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Message extends ConsumerWidget {
-  const _Message({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
-
-  final IconData icon;
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final design = ref.watch(designProvider);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 52, color: design.textSecondary),
-            const SizedBox(height: 14),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: design.headingStyle,
-            ),
-            const SizedBox(height: 6),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Text(
-                message,
-                textAlign: TextAlign.center,
-                style: design.subtitleStyle,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

@@ -240,3 +240,8 @@ final visibleSongsProvider = Provider<List<Song>>((ref) {
   }
   return filtered;
 });
+
+
+final navbarindexProvider = StateProvider<int>(
+  (ref) => 0
+);
