@@ -112,29 +112,7 @@ class TransportControls extends ConsumerWidget {
             inactiveTooltip: 'Repeat off',
           ),
 
-        if(showExtras)
-          Stack(
-            children: [
-              Positioned(
-              child: IconButton(
-                style: IconButton.styleFrom(
-                  fixedSize: Size(40, 40)
-                ),
-                  tooltip: 'Favorite',
-                  onPressed: () =>
-                      ref.read(favoritesProvider.notifier).toggle(song.path),
-                  icon: Icon(
-                    isFavorite
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    color: isFavorite ? design.accent : design.textSecondary,
-                    
-                    size: 25,
-                  ),
-                ),
-            ),
-            ], 
-          ),
+      
       ],
     );
   }
@@ -234,60 +212,63 @@ class MiniPlayerBar extends ConsumerWidget {
           color: design.scaffoldBackground
         ),
         
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SeekBar(),
-            InkWell(
-              borderRadius: BorderRadius.circular(22),
-              onTap: () => _openFullPlayer(context,design),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 2, 10, 12),
-                child: Row(
-                  children: [
-                    AlbumArt(song: song, size: 44, radius: 10),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            song.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: design.titleStyle,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            song.artist,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: design.subtitleStyle,
-                          ),
-                        ],
+        child: ClipRRect(
+          borderRadius: BorderRadiusGeometry.circular(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SeekBar(),
+              InkWell(
+                borderRadius: BorderRadius.circular(22),
+                onTap: () => _openFullPlayer(context,design),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 2, 10, 12),
+                  child: Row(
+                    children: [
+                      AlbumArt(song: song, size: 44, radius: 10),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              song.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: design.titleStyle,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              song.artist,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: design.subtitleStyle,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    TransportControls(
-                      size: 20,
-                      playSize: 42,
-                      showExtras: false,
-                      song: song,
-                    ),
-                    // IconButton(
-                    //   tooltip: 'Open player',
-                    //   onPressed: () => _openFullPlayer(context,design),
-                    //   icon: Icon(
-                    //     Icons.keyboard_arrow_up_rounded,
-                    //     color: design.textSecondary,
-                    //   ),
-                    // ),
-                  ],
+                      const SizedBox(width: 8),
+                      TransportControls(
+                        size: 20,
+                        playSize: 42,
+                        showExtras: false,
+                        song: song,
+                      ),
+                      // IconButton(
+                      //   tooltip: 'Open player',
+                      //   onPressed: () => _openFullPlayer(context,design),
+                      //   icon: Icon(
+                      //     Icons.keyboard_arrow_up_rounded,
+                      //     color: design.textSecondary,
+                      //   ),
+                      // ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

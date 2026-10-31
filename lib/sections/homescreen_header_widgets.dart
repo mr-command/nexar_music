@@ -1,31 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:nexar_app/components/design_system.dart';
 import 'package:nexar_app/services/providers.dart';
 import 'package:nexar_app/services/utils.dart';
-
 
 Widget filterChip(
   String label,
   bool selected,
   VoidCallback onTap,
-  WidgetRef ref
+  WidgetRef ref,
+  IconData icon
 ){
     final design = ref.watch(designProvider);
     return Material(
-      color: selected ? design.accent : design.surfaceColor,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            label,
-            style: design.subtitleStyle.copyWith(
-              color: selected ? Colors.white : design.textSecondary,
-              fontWeight: FontWeight.w600,
+      color: design.scaffoldBackground,
+      // borderRadius: BorderRadius.circular(12),
+      
+      child: Container(
+        margin: EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: selected ? design.accent : design.textSecondary,
+              width: 2,
             ),
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          child: Row(
+            children: [
+              
+              Icon(icon,color: selected? design.accent: design.textSecondary,size: 16,),
+              
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 8,
+                ),
+                child: Text(
+                  label,
+                  style: design.subtitleStyle.copyWith(
+                    color: selected ? design.accent : design.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

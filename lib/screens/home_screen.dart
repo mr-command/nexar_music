@@ -91,6 +91,7 @@ class NavItem extends StatelessWidget {
     );
   }
 }
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -191,8 +192,8 @@ class HomeScreen extends ConsumerWidget {
 
                 Expanded(
                   child: NavItem(
-                    icon: LucideIcons.album,
-                    label: 'Albums',
+                    icon: LucideIcons.list,
+                    label: 'Playlist',
                     selected: index == 2,
                     color: design.accent,
                     onTap: () {
@@ -203,8 +204,8 @@ class HomeScreen extends ConsumerWidget {
 
                 Expanded(
                   child: NavItem(
-                    icon: LucideIcons.playCircle,
-                    label: 'Playlists',
+                    icon: LucideIcons.settings,
+                    label: 'settings',
                     selected: index == 3,
                     color: design.accent,
                     onTap: () {

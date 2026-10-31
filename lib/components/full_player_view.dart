@@ -19,6 +19,10 @@ class FullPlayerView extends ConsumerWidget {
     final song = ref.watch(currentSongProvider);
     final isPlaying = ref.watch(isPlayingProvider).value ?? false;
 
+    final isFavorite = ref.watch(
+      favoritesProvider.select((favorites) => favorites.contains(song!.path)),
+    );
+
     if (song == null) {
       return Padding(
         
@@ -81,12 +85,40 @@ class FullPlayerView extends ConsumerWidget {
             style: design.headingStyle.copyWith(fontSize: 20),
           ),
           const SizedBox(height: 6),
-          Text(
-            song.artist,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: design.subtitleStyle.copyWith(fontSize: 13.5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(width: 30,),
+              Text(
+                song.artist,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: design.subtitleStyle.copyWith(fontSize: 13.5),
+              ),
+              Stack(
+                children: [
+                  Positioned(
+                  child: IconButton(
+                    style: IconButton.styleFrom(
+                      fixedSize: Size(40, 40)
+                    ),
+                      tooltip: 'Favorite',
+                      onPressed: () =>
+                          ref.read(favoritesProvider.notifier).toggle(song.path),
+                      icon: Icon(
+                        isFavorite
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        color: isFavorite ? design.accent : design.textSecondary,
+                        
+                        size: 25,
+                      ),
+                    ),
+                ),
+                ], 
+              ),
+            ],
           ),
           const SizedBox(height: 18),
           const SeekBar(withLabels: true),

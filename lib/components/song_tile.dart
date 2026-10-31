@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexar_app/components/loaders.dart';
 
 import '../services/models.dart';
 import '../services/providers.dart';
@@ -97,11 +98,11 @@ class SongTile extends ConsumerWidget {
     final isFavorite = ref.watch(
       favoritesProvider.select((favorites) => favorites.contains(song.path)),
     );
-
+    
     return Container(
       // padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Material(
-        color: isCurrent ? design.accent.withAlpha(28) : design.surfaceColor,
+        color: isCurrent ? design.accent.withAlpha(28) : design.controlBackground,
         
         // borderRadius: BorderRadius.circular(18),
         child: InkWell(
@@ -113,7 +114,7 @@ class SongTile extends ConsumerWidget {
           onLongPress: () => showDialog<void>(
             context: context,
             builder: (context) => AlertDialog(
-              backgroundColor: design.menuColor,
+              backgroundColor: design.controlBackground,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -162,13 +163,14 @@ class SongTile extends ConsumerWidget {
                 if (isCurrent)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Icon(
-                      isPlaying
-                          ? Icons.graphic_eq_rounded
-                          : Icons.pause_circle_outline_rounded,
+                    child: MusicPlayingIndicator(
                       color: design.accent,
                       size: 20,
-                    ),
+                      
+                      isPlaying: isPlaying
+                      ? true
+                      : false
+                    )
                   )
                 else
                   IconButton(
