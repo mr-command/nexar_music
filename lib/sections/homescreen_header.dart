@@ -11,12 +11,14 @@ import 'package:nexar_app/components/animated_widgets.dart';
 import 'package:nexar_app/features/library/viewmodel/lib_providers.dart';
 import 'package:nexar_app/sections/homescreen_header_widgets.dart';
 import 'package:nexar_app/services/providers.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 class Header extends ConsumerStatefulWidget {
-  const Header({super.key, required this.compact, required this.songCount});
+  const Header({super.key, required this.compact, required this.songCount, required this.pageName});
 
   final bool compact;
   final int songCount;
+  final String pageName;
 
   @override
   ConsumerState<Header> createState() => _HeaderState();
@@ -45,6 +47,7 @@ class _HeaderState extends ConsumerState<Header> {
     final favoritesOnly = ref.watch(favoritesOnlyProvider);
     final compact = widget.compact;
     final songCount = widget.songCount;
+    final pageName = widget.pageName;
     final appStyle = ref.watch(themeProvider);
     final scanActive = ref.watch(
       libraryControllerProvider.select((state) => state.isBusy),
@@ -56,11 +59,14 @@ class _HeaderState extends ConsumerState<Header> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            // spacing: 20,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               
-              const SizedBox(width: 12),
-              Text('N E X A R', style: design.headingStyle,),
-              const SizedBox(width: 10),
+              // const SizedBox(width: 12),
+              Text(pageName, style: design.headingStyle,),
+              // SizedBox(width: 20,),
+              // SizedBox(width: MediaQuery.widthOf(context) * 0.1),
 
               // Expanded(
               //   child: Text(
@@ -94,15 +100,17 @@ class _HeaderState extends ConsumerState<Header> {
               // SortMenu(design: design),
               // const SizedBox(width: 8,),
               // ThemeMenu(design: design,appStyle: appStyle,)
-                AnimatedSearchBar(
+              AnimatedSearchBar(
                 hintText: 'Search songs...',
-                width: MediaQuery.widthOf(context) * 0.45,
+                width: MediaQuery.widthOf(context) * 0.48,
                 onChanged: (query) {
                 },
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 4),
+          Text("Everything You Love , in one place",style: design.subtitleStyle,),
+          const SizedBox(height: 4),
           Row(
             children: [
               // Expanded(
@@ -154,11 +162,11 @@ class _HeaderState extends ConsumerState<Header> {
           Row(
             children: [
               filterChip(
-                'All music',
+                'All musics',
                 !favoritesOnly,
                 () => ref.read(favoritesOnlyProvider.notifier).state = false,
                 ref,
-                LucideIcons.music2400
+                SolarIconsBold.musicNotes
               ),
               const SizedBox(width: 8),
               filterChip(
@@ -166,7 +174,7 @@ class _HeaderState extends ConsumerState<Header> {
                 favoritesOnly,
                 () => ref.read(favoritesOnlyProvider.notifier).state = true,
                 ref,
-                LucideIcons.heart
+                SolarIconsBold.heart
               ),
             ],
           ),

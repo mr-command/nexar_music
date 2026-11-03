@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:nexar_app/services/providers.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 class AnimatedSearchBar extends ConsumerStatefulWidget {
   const AnimatedSearchBar({
@@ -85,7 +86,15 @@ class _AnimatedSearchBarState
   Widget build(BuildContext context) {
     final design = ref.watch(designProvider);
 
-    return Container(
+    return SizedBox(
+  width: widget.width + 44,
+  height: 44,
+  child: Align(
+    alignment: Alignment.centerRight,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+      width: _isExpanded ? widget.width + 44 : 44,
       height: 44,
       decoration: BoxDecoration(
         color: _isExpanded
@@ -94,9 +103,9 @@ class _AnimatedSearchBarState
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        textDirection: TextDirection.rtl,
         children: [
-          // Search button
+         
           Material(
             color: Colors.transparent,
             child: InkWell(
@@ -106,7 +115,7 @@ class _AnimatedSearchBarState
                 width: 44,
                 height: 44,
                 child: Icon(
-                  LucideIcons.search,
+                  SolarIconsOutline.magnifier,
                   size: 20,
                   color: design.textPrimary,
                 ),
@@ -114,72 +123,68 @@ class _AnimatedSearchBarState
             ),
           ),
 
-          // Animated input
-          ClipRect(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 350),
-                curve: Curves.easeOutCubic,
-                width: _isExpanded ? widget.width : 0,
-                height: 44,
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: _isExpanded
-                      ? Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _controller,
-                                focusNode: _focusNode,
-                                onChanged: widget.onChanged,
-                                style: TextStyle(
-                                  color: design.textPrimary,
+   
+          Expanded(
+            child: ClipRect(
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 250),
+                opacity: _isExpanded ? 1 : 0,
+                child: _isExpanded
+                    ? Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              
+                              controller: _controller,
+                              focusNode: _focusNode,
+                              onChanged: widget.onChanged,
+                              style: TextStyle(
+                                color: design.textPrimary,
+                                fontSize: 14,
+                              ),
+                              cursorColor: design.accent,
+                              decoration: InputDecoration(
+                                
+                                hintText: widget.hintText,
+                                hintStyle: TextStyle(
+                                  color: design.textSecondary,
                                   fontSize: 14,
                                 ),
-                                cursorColor: design.accent,
-                                decoration: InputDecoration(
-                                  hintText: widget.hintText,
-                                  hintStyle: TextStyle(
-                                    color: design.textSecondary,
-                                    fontSize: 14,
-                                  ),
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  isDense: true,
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
                                 ),
+                                isDense: true,
                               ),
                             ),
-              
-                            // Close button
-                            IconButton(
-                              onPressed: _closeSearch,
-                              icon: Icon(
-                                LucideIcons.x,
-                                size: 17,
-                                color: design.textSecondary,
-                              ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 36,
-                                minHeight: 40,
-                              ),
-                              splashRadius: 18,
+                          ),
+                          IconButton(
+                            onPressed: _closeSearch,
+                            icon: Icon(
+                              LucideIcons.x,
+                              size: 17,
+                              color: design.textSecondary,
                             ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 40,
+                            ),
+                            splashRadius: 18,
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
               ),
             ),
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }

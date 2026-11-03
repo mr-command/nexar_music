@@ -9,6 +9,7 @@ import 'package:nexar_app/sections/sidenav.dart';
 import 'package:nexar_app/services/models.dart';
 import 'package:nexar_app/services/providers.dart';
 import 'package:nexar_app/services/utils.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 // ---------------------------------------------------------------------------
 // Library list with all states (loading / error / empty / data)
@@ -27,7 +28,7 @@ class _LibraryView extends ConsumerWidget {
 
     if (state.error != null && songs.isEmpty && !state.parsing) {
       return _Message(
-        icon: Icons.error_outline_rounded,
+        icon: SolarIconsOutline.bagMusic,
         title: 'Could not read your music folder',
         message: '${state.error}',
       );
@@ -38,13 +39,13 @@ class _LibraryView extends ConsumerWidget {
     if (songs.isEmpty) {
       if (favoritesOnly) {
         return const _Message(
-          icon: Icons.favorite_border_rounded,
+          icon: SolarIconsOutline.heart,
           title: 'No favorites yet',
           message: 'Tap the heart on any track to add it to your favorites.',
         );
       }
       return _Message(
-        icon: Icons.library_music_rounded,
+        icon: SolarIconsBold.musicLibrary,
         title: 'Your library is empty',
         message: 'Add audio files to ${musicDirectoryLabel()} and hit refresh.',
       );
@@ -140,6 +141,7 @@ class SongScreen extends ConsumerWidget {
               final content = Column(
                 children: [
                   Header(
+                    pageName: "Home",
                     compact: !showSideNav,
                     songCount: visibleSongs.length,
                   ),

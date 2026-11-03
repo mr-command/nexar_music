@@ -84,7 +84,7 @@ class NeumorphismDesign extends DesignSystem {
 
   @override
   TextStyle get headingStyle => const TextStyle(
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: FontWeight.w800,
         color: _textPrimary,
         fontFamily: "tahoma"

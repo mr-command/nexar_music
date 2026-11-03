@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nexar_app/components/loaders.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../services/models.dart';
 import '../services/providers.dart';
@@ -58,7 +59,7 @@ class AlbumArt extends ConsumerWidget {
         color: design.controlBackground,
         alignment: Alignment.center,
         child: Icon(
-          Icons.music_note_rounded,
+          SolarIconsBold.musicNote,
           color: design.textSecondary,
           size: size * 0.45,
         ),
@@ -179,8 +180,8 @@ class SongTile extends ConsumerWidget {
                         ref.read(favoritesProvider.notifier).toggle(song.path),
                     icon: Icon(
                       isFavorite
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
+                          ? SolarIconsBold.heartAngle
+                          : SolarIconsOutline.heartAngle,
                       color: isFavorite ? design.accent : design.textSecondary,
                       size: 20,
                     ),

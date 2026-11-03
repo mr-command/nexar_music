@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../services/providers.dart';
 import 'player_bar.dart';
@@ -30,7 +31,7 @@ class FullPlayerView extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.music_off_rounded,
+            Icon(SolarIconsBold.muted,
                 size: 48, color: design.textSecondary),
             const SizedBox(height: 12),
             Text(
@@ -108,8 +109,8 @@ class FullPlayerView extends ConsumerWidget {
                           ref.read(favoritesProvider.notifier).toggle(song.path),
                       icon: Icon(
                         isFavorite
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
+                            ? SolarIconsBold.heartAngle
+                            : SolarIconsOutline.heartAngle,
                         color: isFavorite ? design.accent : design.textSecondary,
                         
                         size: 25,

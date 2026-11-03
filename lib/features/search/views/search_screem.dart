@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:nexar_app/features/library/viewmodel/lib_providers.dart';
+import 'package:nexar_app/sections/homescreen_header.dart';
 import 'package:nexar_app/sections/homescreen_header_widgets.dart';
 import 'package:nexar_app/services/providers.dart';
 
@@ -43,50 +44,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final scanActive = ref.watch(
       libraryControllerProvider.select((state) => state.isBusy),
     );
+    final width = MediaQuery.widthOf(context);
+    final showSideNav = width >= 760;
+    final showPanel = width >= 1180;
+    final visibleSongs = ref.watch(visibleSongsProvider);
 
-    return Padding(
-      padding: EdgeInsetsGeometry.all(16),
+    return Container(
+      // padding: EdgeInsetsGeometry.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [design.accent, design.accent.withAlpha(130)],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.graphic_eq_rounded,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text('Nexar', style: design.headingStyle),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Scraped tracks',
-                  style: design.subtitleStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (scanActive)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: SizedBox.square(
-                    dimension: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: design.accent,
-                    ),
-                  ),
-                ),
+          
+              
               // IconButton.filledTonal(
               //   tooltip: 'Refresh library',
               //   onPressed: () =>
@@ -100,40 +69,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               // SortMenu(design: design),
               // const SizedBox(width: 8,),
               // ThemeMenu(design: design,appStyle: appStyle,)
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (value) =>
-                      ref.read(searchQueryProvider.notifier).state = value,
-                  style: design.titleStyle,
-                  cursorColor: design.accent,
-                  decoration: InputDecoration(
-                    hintText: 'Search any songs in internet ...',
-                    hintStyle: design.subtitleStyle,
-                    prefixIcon: Icon(
-                      LucideIcons.search,
-                      color: design.textSecondary,
-                    ),
-                    isDense: true,
-                    filled: true,
-                    fillColor: design.surfaceColor,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
+            
+          // const SizedBox(height: 14),
+          Header(
+                compact: !showSideNav,
+                songCount: visibleSongs.length,
+                pageName: "Search",
               ),
-              const SizedBox(width: 10),
-              
-            ],
-          ),
         ],
       ),
     );

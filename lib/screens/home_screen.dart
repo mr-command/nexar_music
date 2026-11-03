@@ -9,6 +9,7 @@ import 'package:nexar_app/features/search/views/search_screem.dart';
 import 'package:nexar_app/features/settings/views/settings_screen.dart';
 import 'package:nexar_app/sections/sidenav.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:solar_icons/solar_icons.dart';
 import '../sections/homescreen_header.dart';
 import '../components/full_player_view.dart';
 import '../components/player_bar.dart';
@@ -112,7 +113,7 @@ class HomeScreen extends ConsumerWidget {
           switchOutCurve: Curves.easeInCubic,
           transitionBuilder: (child, animation) {
             final offsetAnimation = Tween<Offset>(
-              begin: const Offset(0.04, 0),
+              begin: const Offset(0.1, 0),
               end: Offset.zero,
             ).animate(
               CurvedAnimation(
@@ -168,7 +169,9 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: NavItem(
-                    icon: LucideIcons.house,
+                    icon: index == 0
+                    ?SolarIconsOutline.home
+                    : SolarIconsOutline.homeAngle,
                     label: 'Home',
                     selected: index == 0,
                     color: design.accent,
@@ -180,7 +183,9 @@ class HomeScreen extends ConsumerWidget {
 
                 Expanded(
                   child: NavItem(
-                    icon: LucideIcons.search,
+                    icon: index == 1
+                    ?SolarIconsOutline.roundedMagnifier
+                    : SolarIconsOutline.magnifier,
                     label: 'Search',
                     selected: index == 1,
                     color: design.accent,
@@ -192,7 +197,9 @@ class HomeScreen extends ConsumerWidget {
 
                 Expanded(
                   child: NavItem(
-                    icon: LucideIcons.list,
+                    icon: index == 2
+                    ?SolarIconsOutline.playlist
+                    : SolarIconsOutline.playlistMinimalistic,
                     label: 'Playlist',
                     selected: index == 2,
                     color: design.accent,
@@ -204,7 +211,9 @@ class HomeScreen extends ConsumerWidget {
 
                 Expanded(
                   child: NavItem(
-                    icon: LucideIcons.settings,
+                    icon: index == 3
+                    ?SolarIconsOutline.settings
+                    : SolarIconsOutline.settingsMinimalistic,
                     label: 'settings',
                     selected: index == 3,
                     color: design.accent,
