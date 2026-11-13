@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:nexar_app/components/design_system.dart';
+import 'package:nexar_app/features/library/viewmodel/lib_providers.dart';
 import 'package:nexar_app/services/models.dart';
+import 'package:nexar_app/services/utils.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../screens/now_playing_sheet.dart';
 import '../services/providers.dart';
@@ -41,8 +44,7 @@ class TransportControls extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        if (showExtras)
-          SizedBox(),
+        
         if (showExtras)
           _ToggleIcon(
             active: ref.watch(shuffleStateProvider).value ?? false,
@@ -159,19 +161,21 @@ class SeekBar extends ConsumerWidget {
     final position = ref.watch(positionProvider).value ?? Duration.zero;
     final duration = ref.watch(durationProvider).value ?? Duration.zero;
     final audio = ref.read(audioServiceProvider);
+    final color = ref.read(coverColorProvider);
+    final coverColor = color.value;
 
     return ProgressBar(
       progress: position,
       total: duration,
       onSeek: audio.seek,
-      barHeight: withLabels ? 5 : 3,
+      barHeight: withLabels ? 3 : 3,
       baseBarColor:
           design.hasBackdropImage ? Colors.white24 : design.dividerColor,
-      progressBarColor: design.accent,
+      progressBarColor: coverColor ?? design.accent,
       bufferedBarColor:
           design.hasBackdropImage ? Colors.white38 : design.dividerColor,
-      thumbColor: design.accent,
-      thumbRadius: withLabels ? 7 : 0,
+      thumbColor: coverColor ?? design.accent,
+      thumbRadius: withLabels ? 5 : 0,
       barCapShape: BarCapShape.round,
       timeLabelLocation: withLabels
           ? TimeLabelLocation.below
@@ -201,25 +205,34 @@ class MiniPlayerBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final design = ref.watch(designProvider);
     final song = ref.watch(currentSongProvider);
-
+    final colorAsync = ref.watch(coverColorProvider);
+    final showExtra = ref.watch(showExtraProvider);
+    final coverColor = colorAsync.value;
+    final isFavorite = ref.watch(
+      favoritesProvider.select((favorites) => favorites.contains(song!.path)),
+    );
+    final newStyleColor = invertColor(coverColor?? design.accent);
+    
     if (song == null) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Container(
+        
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: design.scaffoldBackground
+          borderRadius: BorderRadius.circular(100),
+          gradient: LinearGradient(colors: [lightenColor(coverColor?? design.accent, 0.4) , lightenColor(coverColor?? design.scaffoldBackground, 0.7)])
         ),
         
         child: ClipRRect(
-          borderRadius: BorderRadiusGeometry.circular(20),
+          borderRadius: BorderRadiusGeometry.circular(100),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SeekBar(),
+              SizedBox(height: 6,),
               InkWell(
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(100),
                 onTap: () => _openFullPlayer(context,design),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 2, 10, 12),
@@ -236,6 +249,7 @@ class MiniPlayerBar extends ConsumerWidget {
                               song.title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              
                               style: design.titleStyle,
                             ),
                             const SizedBox(height: 2),
@@ -249,11 +263,28 @@ class MiniPlayerBar extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
+                      if (showExtra)
                       TransportControls(
                         size: 20,
                         playSize: 42,
                         showExtras: false,
                         song: song,
+                      )
+                    else
+                      IconButton(
+                        tooltip: 'Favorite',
+                        onPressed: () {
+                          ref.read(favoritesProvider.notifier).toggle(song.path);
+                        },
+                        icon: Icon(
+                          isFavorite
+                              ? SolarIconsBold.heartAngle
+                              : SolarIconsOutline.heartAngle,
+                          color: isFavorite
+                              ? design.accent
+                              : design.textSecondary,
+                          size: 25,
+                        ),
                       ),
                       // IconButton(
                       //   tooltip: 'Open player',

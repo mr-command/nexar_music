@@ -168,3 +168,5 @@ class LibraryController extends StateNotifier<LibraryState> {
     }
   }
 }
+
+final showExtraProvider = StateProvider<bool>((ref) => false,);

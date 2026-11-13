@@ -162,7 +162,7 @@ class HomeScreen extends ConsumerWidget {
             height: 64,
             padding: const EdgeInsets.symmetric(horizontal: 6),
             decoration: BoxDecoration(
-              color: design.menuColor,
+              color: design.surfaceColor,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -195,33 +195,33 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
 
-                Expanded(
-                  child: NavItem(
-                    icon: index == 2
-                    ?SolarIconsOutline.playlist
-                    : SolarIconsOutline.playlistMinimalistic,
-                    label: 'Playlist',
-                    selected: index == 2,
-                    color: design.accent,
-                    onTap: () {
-                      ref.read(navbarindexProvider.notifier).state = 2;
-                    },
-                  ),
-                ),
+                // Expanded(
+                //   child: NavItem(
+                //     icon: index == 2
+                //     ?SolarIconsOutline.playlist
+                //     : SolarIconsOutline.playlistMinimalistic,
+                //     label: 'Playlist',
+                //     selected: index == 2,
+                //     color: design.accent,
+                //     onTap: () {
+                //       ref.read(navbarindexProvider.notifier).state = 2;
+                //     },
+                //   ),
+                // ),
 
-                Expanded(
-                  child: NavItem(
-                    icon: index == 3
-                    ?SolarIconsOutline.settings
-                    : SolarIconsOutline.settingsMinimalistic,
-                    label: 'settings',
-                    selected: index == 3,
-                    color: design.accent,
-                    onTap: () {
-                      ref.read(navbarindexProvider.notifier).state = 3;
-                    },
-                  ),
-                ),
+                // Expanded(
+                //   child: NavItem(
+                //     icon: index == 3
+                //     ?SolarIconsOutline.settings
+                //     : SolarIconsOutline.settingsMinimalistic,
+                //     label: 'settings',
+                //     selected: index == 3,
+                //     color: design.accent,
+                //     onTap: () {
+                //       ref.read(navbarindexProvider.notifier).state = 3;
+                //     },
+                //   ),
+                // ),
               ],
             ),
           )

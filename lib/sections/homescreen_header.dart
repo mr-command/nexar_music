@@ -103,7 +103,9 @@ class _HeaderState extends ConsumerState<Header> {
               AnimatedSearchBar(
                 hintText: 'Search songs...',
                 width: MediaQuery.widthOf(context) * 0.48,
+                
                 onChanged: (query) {
+                  ref.read(searchQueryProvider.notifier).state = query;
                 },
               ),
             ],

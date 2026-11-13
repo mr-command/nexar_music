@@ -151,8 +151,8 @@ class _AnimatedSearchBarState
                                   fontSize: 14,
                                 ),
                                 border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
+                                enabledBorder: UnderlineInputBorder(),
+                                focusedBorder: UnderlineInputBorder(),
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                   vertical: 10,

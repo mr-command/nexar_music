@@ -46,6 +46,7 @@ dependencies:
   google_nav_bar: ^5.0.7
   lucide_icons_flutter: ^3.1.21
   solar_icons: ^0.2.0
+  palette_generator_plus: ^1.0.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0

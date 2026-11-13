@@ -1,7 +1,65 @@
 import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexar_app/services/providers.dart';
 
 import 'models.dart';
+import 'package:flutter/material.dart';
+import 'package:palette_generator_plus/palette_generator_plus.dart';
 
+
+
+// extract colors from music cover
+
+
+Future<Color?> extractCoverColor(Uint8List bytes) async {
+  if (bytes.isEmpty) return null;
+
+  try {
+    final palette = await PaletteGenerator.fromImageProvider(
+      MemoryImage(bytes),
+    );
+
+    return palette.dominantColor?.color;
+  } catch (e) {
+    return null;
+  }
+}
+
+final coverColorProvider = FutureProvider<Color?>((ref) async {
+  final song = ref.watch(currentSongProvider);
+
+  if (song == null) return null;
+
+  final artwork = await ref.watch(
+    artworkProvider(song.path).future,
+  );
+
+  if (artwork == null || artwork.isEmpty) return null;
+
+  return extractCoverColor(artwork);
+});
+
+
+
+
+
+// Color helpers
+
+Color lightenColor(Color color, double amount) {
+  return Color.lerp(color, Colors.white, amount)!;
+}
+
+
+Color invertColor(Color color) {
+  return Color.fromARGB(
+    color.a.toInt(),
+    255 - color.r.toInt(),
+    255 - color.g.toInt(),
+    255 - color.b.toInt(),
+  );
+}
 /// Supported audio file extensions.
 const audioExtensions = <String>[
   '.mp3',

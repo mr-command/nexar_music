@@ -22,7 +22,7 @@ enum AppStyle { light, dark }
 
 
 
-final themeProvider = StateProvider<AppStyle>((ref) => AppStyle.light);
+final themeProvider = StateProvider<AppStyle>((ref) => AppStyle.dark);
 
 final designProvider = Provider<DesignSystem>((ref) {
   return switch (ref.watch(themeProvider)) {

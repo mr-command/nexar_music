@@ -45,12 +45,12 @@ class NeumorphismDesign extends DesignSystem {
   /// Raw accent as an int, shared with the native notification styling.
   static const int accentValue = 0xFF7C3AED;
 
-  static const _bg = Colors.white;
-  static const _surface = Color(0xFFF4EFFA);
-  static const _control = Color.fromARGB(255, 250, 250, 250);
-  static const _accent = Colors.pink;
-  static const _textPrimary = Color(0xFF241C33);
-  static const _textSecondary = Color(0xFF6F6786);
+  static const _bg = Color(0xFFFAF8FB);
+  static const _surface = Colors.white;
+  static const _control = Color(0xFFFAF8FB);
+  static const _accent = Color(0xFFE83E78);
+  static const _textPrimary = Color(0xFF292333);
+  static const _textSecondary = Color(0xFF82788E);
 
   @override
   String get label => 'Neumorphism';
@@ -150,7 +150,7 @@ class LiquidGlassDesign extends DesignSystem {
   Color get scaffoldBackground =>  Colors.black;
 
   @override
-  Color get surfaceColor => Colors.grey.withAlpha(36);
+  Color get surfaceColor => const Color.fromARGB(255, 22, 22, 22);
 
   @override
   Color get controlBackground => const Color.fromARGB(255, 5, 5, 5);
