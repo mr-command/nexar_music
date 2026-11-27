@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// scan — until the cache is cleared or the user forces a refresh.
 abstract final class MusicCache {
   static const String _key = 'cached_music_paths';
+  static const String _downloadedKey = 'downloaded_music_paths';
 
   /// Cached audio paths, or an empty list when nothing was scanned yet.
   static Future<List<String>> loadPaths() async {
@@ -34,6 +35,28 @@ abstract final class MusicCache {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_key);
+    } catch (_) {}
+  }
+
+  /// Audio files downloaded from the online catalog. Kept separately from the
+  /// scan cache so a full rescan never drops them.
+  static Future<List<String>> loadDownloadedPaths() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getStringList(_downloadedKey) ?? const <String>[];
+    } catch (_) {
+      return const <String>[];
+    }
+  }
+
+  static Future<void> addDownloadedPath(String path) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final paths = prefs.getStringList(_downloadedKey) ?? <String>[];
+      if (!paths.contains(path)) {
+        paths.add(path);
+        await prefs.setStringList(_downloadedKey, paths);
+      }
     } catch (_) {}
   }
 }

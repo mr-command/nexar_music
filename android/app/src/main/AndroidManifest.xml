@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Online catalog search + downloads. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Read music from shared storage: Android 13+ uses READ_MEDIA_AUDIO,
          Android 4.4–12 uses READ_EXTERNAL_STORAGE. -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>

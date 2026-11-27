@@ -111,7 +111,82 @@ class _HeaderState extends ConsumerState<Header> {
             ],
           ),
           const SizedBox(height: 4),
-          Text("Everything You Love , in one place",style: design.subtitleStyle,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Everything You Love , in one place",style: design.subtitleStyle,),
+              PopupMenuButton<AppStyle>(
+                icon: const Icon(Icons.more_vert),
+
+                onSelected: (value) {
+                  switch (value) {
+                    case AppStyle.light:
+                      ref.read(themeProvider.notifier).state = AppStyle.light;
+                      break;
+
+                    case AppStyle.dark:
+                      ref.read(themeProvider.notifier).state = AppStyle.dark;
+                      break;
+                  }
+                },
+
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: AppStyle.light,
+                    child: Row(
+                      children: [
+                        Icon(
+                          appStyle == AppStyle.light
+                              ? Icons.check_rounded
+                              : Icons.radio_button_off_outlined,
+                          size: 18,
+                          color: appStyle == AppStyle.light
+                              ? design.accent
+                              : design.textSecondary,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Light',
+                          style: TextStyle(
+                            color: appStyle == AppStyle.light
+                                ? design.accent
+                                : design.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  PopupMenuItem(
+                    value: AppStyle.dark,
+                    child: Row(
+                      children: [
+                        Icon(
+                          appStyle == AppStyle.dark
+                              ? Icons.check_rounded
+                              : Icons.radio_button_off_outlined,
+                          size: 18,
+                          color: appStyle == AppStyle.dark
+                              ? design.accent
+                              : design.textSecondary,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Dark',
+                          style: TextStyle(
+                            color: appStyle == AppStyle.dark
+                                ? design.accent
+                                : design.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+
+            ],
+          ),
           const SizedBox(height: 4),
           Row(
             children: [
@@ -157,6 +232,9 @@ class _HeaderState extends ConsumerState<Header> {
               //   ),
               //   icon: Icon(Icons.shuffle_rounded, color: design.textPrimary),
               // ),
+
+
+
 
             ],
           ),

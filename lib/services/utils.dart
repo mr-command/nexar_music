@@ -51,6 +51,14 @@ Color lightenColor(Color color, double amount) {
   return Color.lerp(color, Colors.white, amount)!;
 }
 
+/// Picks a readable foreground for arbitrary backgrounds such as artwork
+/// colors, so icons never wash out in either theme.
+Color foregroundOn(Color background) {
+  return background.computeLuminance() > 0.45
+      ? const Color(0xFF14201A)
+      : Colors.white;
+}
+
 
 Color invertColor(Color color) {
   return Color.fromARGB(

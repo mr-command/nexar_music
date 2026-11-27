@@ -15,6 +15,9 @@ abstract class DesignSystem {
   Color get surfaceColor;
   Color get controlBackground;
   Color get accent;
+
+  /// Foreground (icons/labels) placed directly on top of [accent].
+  Color get onAccent;
   Color get textPrimary;
   Color get textSecondary;
   Color get dividerColor;
@@ -43,14 +46,15 @@ class NeumorphismDesign extends DesignSystem {
   const NeumorphismDesign();
 
   /// Raw accent as an int, shared with the native notification styling.
-  static const int accentValue = 0xFF7C3AED;
+  static const int accentValue = 0xFF3F6B4A;
 
-  static const _bg = Color(0xFFFAF8FB);
-  static const _surface = Colors.white;
-  static const _control = Color(0xFFFAF8FB);
-  static const _accent = Color(0xFFE83E78);
-  static const _textPrimary = Color(0xFF292333);
-  static const _textSecondary = Color(0xFF82788E);
+  static const _bg = Color(0xFFF3EFE6);
+  static const _surface = Color(0xFFFCFAF4);
+  static const _control = Color(0xFFEAE4D7);
+  static const _accent = Color(0xFF3F6B4A);
+  static const _onAccent = Color(0xFFFFF9F0);
+  static const _textPrimary = Color(0xFF232B25);
+  static const _textSecondary = Color(0xFF5C665D);
 
   @override
   String get label => 'Neumorphism';
@@ -62,13 +66,16 @@ class NeumorphismDesign extends DesignSystem {
   Color get scaffoldBackground => _bg;
 
   @override
-  Color get surfaceColor => const Color.fromARGB(255, 255, 255, 255);
+  Color get surfaceColor => _surface;
 
   @override
   Color get controlBackground => _control;
 
   @override
-  Color get accent => _accent;
+  Color get accent => const Color.fromARGB(255, 63, 107, 103);
+
+  @override
+  Color get onAccent => _onAccent;
 
   @override
   Color get textPrimary => _textPrimary;
@@ -77,7 +84,7 @@ class NeumorphismDesign extends DesignSystem {
   Color get textSecondary => _textSecondary;
 
   @override
-  Color get dividerColor => const Color(0xFFD5CCDF);
+  Color get dividerColor => const Color(0xFFD6D1C2);
 
   @override
   Color get menuColor => _surface;
@@ -117,7 +124,7 @@ class NeumorphismDesign extends DesignSystem {
         borderRadius: BorderRadius.circular(radius),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x40B4A8C8),
+            color: Color(0x40AFA78F),
             offset: Offset(5, 5),
             blurRadius: 14,
           ),
@@ -147,48 +154,51 @@ class LiquidGlassDesign extends DesignSystem {
   bool get hasBackdropImage => false;
 
   @override
-  Color get scaffoldBackground =>  Colors.black;
+  Color get scaffoldBackground => const Color(0xFF0F1310);
 
   @override
-  Color get surfaceColor => const Color.fromARGB(255, 22, 22, 22);
+  Color get surfaceColor => const Color(0xFF1A201B);
 
   @override
-  Color get controlBackground => const Color.fromARGB(255, 5, 5, 5);
+  Color get controlBackground => const Color(0xFF242B25);
 
   @override
-  Color get accent => Colors.deepOrange;
+  Color get accent => const Color.fromARGB(255, 143, 205, 207);
 
   @override
-  Color get textPrimary => Colors.white;
+  Color get onAccent => const Color(0xFF102015);
 
   @override
-  Color get textSecondary => Colors.white.withAlpha(166);
+  Color get textPrimary => const Color(0xFFF2F4ED);
 
   @override
-  Color get dividerColor => Colors.white.withAlpha(56);
+  Color get textSecondary => const Color(0xFFA9B3A8);
 
   @override
-  Color get menuColor => const Color.fromARGB(255, 0, 0, 0);
+  Color get dividerColor => const Color(0xFF333C34);
+
+  @override
+  Color get menuColor => const Color(0xFF151A16);
 
   @override
   TextStyle get headingStyle => const TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.w800,
-        color: Colors.white,
+        color: Color(0xFFF2F4ED),
       );
 
   @override
   TextStyle get titleStyle => const TextStyle(
         fontSize: 14.5,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: Color(0xFFF2F4ED),
       );
 
   @override
-  TextStyle get subtitleStyle => TextStyle(
+  TextStyle get subtitleStyle => const TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: Colors.white.withAlpha(166),
+        color: Color(0xFFA9B3A8),
       );
 
   @override
@@ -206,8 +216,7 @@ class LiquidGlassDesign extends DesignSystem {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: Colors.grey
-          
+          color: (color ?? surfaceColor).withAlpha(235),
         ),
         
         child: child,

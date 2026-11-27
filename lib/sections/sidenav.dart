@@ -33,7 +33,7 @@ class SideNav extends ConsumerWidget {
           Icon(
             icon,
             size: 20,
-            color: selected ? Colors.white : design.textSecondary,
+            color: selected ? design.onAccent : design.textSecondary,
           ),
           if (expanded) ...[
             const SizedBox(width: 12),
@@ -43,7 +43,7 @@ class SideNav extends ConsumerWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: design.titleStyle.copyWith(
-                  color: selected ? Colors.white : design.textPrimary,
+                  color: selected ? design.onAccent : design.textPrimary,
                 ),
               ),
             ),
@@ -97,9 +97,9 @@ class SideNav extends ConsumerWidget {
                       ),
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.graphic_eq_rounded,
-                      color: Colors.white,
+                      color: design.onAccent,
                     ),
                   ),
                 ),

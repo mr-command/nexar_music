@@ -66,6 +66,7 @@ class ThemeMenu extends ConsumerWidget {
     return PopupMenuButton<AppStyle>(
       
       tooltip: 'Appearance',
+      
       surfaceTintColor: design.surfaceColor,
       icon: Icon(Icons.palette_outlined, color: design.textPrimary),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -174,7 +175,7 @@ class SortMenu extends ConsumerWidget {
         const PopupMenuDivider(),
         const PopupMenuItem<SortField?>(
           value: null,
-          child: _ReverseOrderRow(),
+          child: ReverseOrderRow(),
         ),
       ],
       style: IconButton.styleFrom(backgroundColor: design.controlBackground),
@@ -183,8 +184,8 @@ class SortMenu extends ConsumerWidget {
   }
 }
 
-class _ReverseOrderRow extends ConsumerWidget {
-  const _ReverseOrderRow();
+class ReverseOrderRow extends ConsumerWidget {
+  const ReverseOrderRow();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

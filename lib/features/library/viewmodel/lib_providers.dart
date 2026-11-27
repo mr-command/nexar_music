@@ -98,6 +98,26 @@ class LibraryController extends StateNotifier<LibraryState> {
   /// again and rewrites the path cache.
   Future<void> refresh() => _load(forceRescan: true);
 
+  /// Adds a freshly downloaded file to the visible library immediately and
+  /// remembers it so later rescans keep it.
+  Future<void> addDownloadedSong(String path) async {
+    await MusicCache.addDownloadedPath(path);
+    if (state.songs.any((song) => song.path == path)) return;
+
+    final parsed = await Song.parseBatch([path]);
+    if (parsed.isEmpty) return;
+
+    state = LibraryState(
+      scanning: state.scanning,
+      parsing: state.parsing,
+      error: state.error,
+      songs: _dedupeSameTracks(
+        [...state.songs, parsed.first],
+        isFavorite,
+      ),
+    );
+  }
+
   Future<void> _load({bool forceRescan = false}) async {
     final generation = ++_generation;
     state = const LibraryState(scanning: true);
@@ -115,6 +135,10 @@ class LibraryController extends StateNotifier<LibraryState> {
       if (paths.isEmpty) {
         paths = await scanAudioFiles();
         await MusicCache.savePaths(paths);
+      }
+      final downloaded = await MusicCache.loadDownloadedPaths();
+      if (downloaded.isNotEmpty) {
+        paths = <String>{...paths, ...downloaded}.toList();
       }
       if (generation != _generation) return;
 

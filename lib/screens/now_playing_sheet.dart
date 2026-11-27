@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexar_app/services/utils.dart';
 
 import '../components/full_player_view.dart';
 import '../services/providers.dart';
@@ -13,7 +14,11 @@ class NowPlayingSheet extends ConsumerWidget {
     final design = ref.watch(designProvider);
     final size = MediaQuery.sizeOf(context);
     final wide = size.width >= 720;
-
+    final coverColor = ref.watch(coverColorProvider).value;
+    final sheetTint = Color.alphaBlend(
+      (coverColor ?? design.accent).withAlpha(30),
+      design.menuColor,
+    );
     final sheet = Container(
       // margin: EdgeInsets.fromLTRB(
       //   wide ? (size.width - 520) / 2 : 0,
@@ -23,7 +28,11 @@ class NowPlayingSheet extends ConsumerWidget {
       // ),
       constraints: BoxConstraints(maxHeight: size.height * 0.92),
       decoration: BoxDecoration(
-        color: design.menuColor,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [sheetTint, design.menuColor],
+        ),
         borderRadius: BorderRadius.vertical(
           
           top: Radius.circular(wide ? 32 : 28),
@@ -37,13 +46,7 @@ class NowPlayingSheet extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  tooltip: 'Close',
-                  onPressed: Navigator.of(context).pop,
-                  icon: Icon(Icons.keyboard_arrow_down_rounded,
-                      color: design.textPrimary),
-                ),
-                Text('NOW PLAYING', style: design.subtitleStyle),
+                // Text('Playing', style: design.subtitleStyle),
                 const SizedBox(width: 48),
               ],
             ),

@@ -2,7 +2,6 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:nexar_app/components/design_system.dart';
 import 'package:nexar_app/features/library/viewmodel/lib_providers.dart';
 import 'package:nexar_app/services/models.dart';
 import 'package:nexar_app/services/utils.dart';
@@ -32,14 +31,13 @@ class TransportControls extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final coverColor = ref.watch(coverColorProvider).value;
     final design = ref.watch(designProvider);
     final audio = ref.read(audioServiceProvider);
     final isPlaying = ref.watch(isPlayingProvider).value ?? false;
     final loopMode =
         ref.watch(loopStateProvider).value ?? PlaylistMode.none;
-    final isFavorite = ref.watch(
-      favoritesProvider.select((favorites) => favorites.contains(song.path)),
-    );
+
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -53,7 +51,7 @@ class TransportControls extends ConsumerWidget {
                   !(ref.read(shuffleStateProvider).value ?? false);
               audio.setShuffle(enabled);
             },
-            icon: Icons.shuffle_rounded,
+            icon: SolarIconsOutline.shuffle,
             size: size,
             activeTooltip: 'Shuffle on',
             inactiveTooltip: 'Shuffle off',
@@ -61,13 +59,13 @@ class TransportControls extends ConsumerWidget {
         IconButton(
           tooltip: 'Previous',
           onPressed: audio.previous,
-          icon: Icon(Icons.skip_previous_rounded, size: size + 6),
+          icon: Icon(SolarIconsBold.skipPrevious, size: size),
           color: design.textPrimary,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Material(
-            color: design.accent,
+            color:  design.accent.withAlpha(150),
             borderRadius: BorderRadius.circular(playSize),
             child: InkWell(
               borderRadius: BorderRadius.circular(playSize),
@@ -77,10 +75,10 @@ class TransportControls extends ConsumerWidget {
                 height: playSize,
                 child: Icon(
                   isPlaying
-                      ? Icons.pause_rounded
-                      : Icons.play_arrow_rounded,
-                  color: Colors.white,
-                  size: playSize * 0.6,
+                      ? SolarIconsBold.pause
+                      : SolarIconsBold.play,
+                  color:  design.textPrimary,
+                  size: playSize * 0.5,
                 ),
               ),
             ),
@@ -89,7 +87,7 @@ class TransportControls extends ConsumerWidget {
         IconButton(
           tooltip: 'Next',
           onPressed: audio.next,
-          icon: Icon(Icons.skip_next_rounded, size: size + 6),
+          icon: Icon(SolarIconsBold.skipNext, size: size),
           color: design.textPrimary,
         ),
 
@@ -106,8 +104,8 @@ class TransportControls extends ConsumerWidget {
               audio.setLoop(next);
             },
             icon: loopMode == PlaylistMode.single
-                ? Icons.repeat_one_rounded
-                : Icons.repeat_rounded,
+                ? SolarIconsBold.repeatOne
+                : SolarIconsBold.repeat,
             size: size,
             activeTooltip:
                 loopMode == PlaylistMode.single ? 'Repeat one' : 'Repeat all',
@@ -140,11 +138,12 @@ class _ToggleIcon extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final design = ref.watch(designProvider);
+    final coverColor = ref.watch(coverColorProvider).value;
     return IconButton(
       tooltip: active ? activeTooltip : inactiveTooltip,
       onPressed: onToggle,
       icon: Icon(icon, size: size),
-      color: active ? design.accent : design.textSecondary,
+      color: active ?  design.accent : design.textSecondary,
     );
   }
 }
@@ -171,10 +170,10 @@ class SeekBar extends ConsumerWidget {
       barHeight: withLabels ? 3 : 3,
       baseBarColor:
           design.hasBackdropImage ? Colors.white24 : design.dividerColor,
-      progressBarColor: coverColor ?? design.accent,
+      progressBarColor: design.accent,
       bufferedBarColor:
           design.hasBackdropImage ? Colors.white38 : design.dividerColor,
-      thumbColor: coverColor ?? design.accent,
+      thumbColor: design.accent,
       thumbRadius: withLabels ? 5 : 0,
       barCapShape: BarCapShape.round,
       timeLabelLocation: withLabels
@@ -191,29 +190,39 @@ class SeekBar extends ConsumerWidget {
 class MiniPlayerBar extends ConsumerWidget {
   const MiniPlayerBar({super.key});
 
-  void _openFullPlayer(BuildContext context,DesignSystem design) {
+  void _openFullPlayer(BuildContext context,WidgetRef ref) {
+    final coverColor = ref.watch(coverColorProvider);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: design.menuColor,
+      backgroundColor: coverColor.value,
       builder: (_) => const NowPlayingSheet(),
     );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final design = ref.watch(designProvider);
-    final song = ref.watch(currentSongProvider);
-    final colorAsync = ref.watch(coverColorProvider);
-    final showExtra = ref.watch(showExtraProvider);
-    final coverColor = colorAsync.value;
-    final isFavorite = ref.watch(
-      favoritesProvider.select((favorites) => favorites.contains(song!.path)),
-    );
-    final newStyleColor = invertColor(coverColor?? design.accent);
-    
-    if (song == null) return const SizedBox.shrink();
+  final design = ref.watch(designProvider);
+  final song = ref.watch(currentSongProvider);
+
+  if (song == null) {
+    return const SizedBox.shrink();
+  }
+
+  final colorAsync = ref.watch(coverColorProvider);
+  final showExtra = ref.watch(showExtraProvider);
+  final coverColor = colorAsync.value;
+
+  final isFavorite = ref.watch(
+    favoritesProvider.select(
+      (favorites) => favorites.contains(song.path),
+    ),
+  );
+  final barTint = Color.alphaBlend(
+    (coverColor ?? design.accent).withAlpha(28),
+    design.surfaceColor,
+  );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
@@ -221,7 +230,11 @@ class MiniPlayerBar extends ConsumerWidget {
         
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(100),
-          gradient: LinearGradient(colors: [lightenColor(coverColor?? design.accent, 0.4) , lightenColor(coverColor?? design.scaffoldBackground, 0.7)])
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [barTint, design.surfaceColor],
+          ),
         ),
         
         child: ClipRRect(
@@ -233,7 +246,7 @@ class MiniPlayerBar extends ConsumerWidget {
               SizedBox(height: 6,),
               InkWell(
                 borderRadius: BorderRadius.circular(100),
-                onTap: () => _openFullPlayer(context,design),
+                onTap: () => _openFullPlayer(context,ref),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 2, 10, 12),
                   child: Row(

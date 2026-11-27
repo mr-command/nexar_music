@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexar_app/services/utils.dart';
 import 'package:solar_icons/solar_icons.dart';
 
 import '../services/providers.dart';
@@ -18,13 +19,13 @@ class FullPlayerView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final design = ref.watch(designProvider);
     final song = ref.watch(currentSongProvider);
-    final isPlaying = ref.watch(isPlayingProvider).value ?? false;
 
-    final isFavorite = ref.watch(
-      favoritesProvider.select((favorites) => favorites.contains(song!.path)),
-    );
+    final isPlaying = ref.watch(isPlayingProvider).value ?? false;
+    final coverColor = ref.watch(coverColorProvider).value;
+
 
     if (song == null) {
+
       return Padding(
         
         padding: const EdgeInsets.all(32),
@@ -35,7 +36,7 @@ class FullPlayerView extends ConsumerWidget {
                 size: 48, color: design.textSecondary),
             const SizedBox(height: 12),
             Text(
-              'Nothing playing',
+              'playing right now',
               style: design.headingStyle.copyWith(fontSize: 16),
             ),
             const SizedBox(height: 4),
@@ -47,8 +48,16 @@ class FullPlayerView extends ConsumerWidget {
         ),
       );
     }
-
+  final isFavorite = ref.watch(
+      favoritesProvider.select(
+      (favorites) => favorites.contains(song.path),
+    ),
+  );
     final artSize = compact ? 260.0 : 300.0;
+    final playerTint = Color.alphaBlend(
+      design.accent.withAlpha(30),
+      design.menuColor,
+    );
 
     final artwork = Container(
       width: artSize,
@@ -70,7 +79,11 @@ class FullPlayerView extends ConsumerWidget {
       decoration: BoxDecoration(
         
         borderRadius: BorderRadius.vertical(top:Radius.circular(24)),
-        color: design.menuColor
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [playerTint, design.menuColor],
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
@@ -111,7 +124,9 @@ class FullPlayerView extends ConsumerWidget {
                         isFavorite
                             ? SolarIconsBold.heartAngle
                             : SolarIconsOutline.heartAngle,
-                        color: isFavorite ? design.accent : design.textSecondary,
+                        color: isFavorite
+                            ?  design.accent
+                            : design.textSecondary,
                         
                         size: 25,
                       ),
